@@ -2,7 +2,7 @@
 
 A complete Obsidian vault built around one DataviewJS dashboard. It runs a job-search pipeline, a recipe box with a meal planner and shopping list, a reading shelf, a six-day training plan with animated form demos, a habit system with a heatmap, and a focus timer. Everything renders from tagged Markdown, so the views stay disposable and your notes stay the source of truth.
 
-I built this template based off a vault to organize my own life. It might be a good starting point for you, but it will need a decent amount of work. I may not be responsive with pull requests as I'm not a developer and could have trouble validating any work. Instead, I recommend you take this template and run with it however you want in your own repos.
+I built this template based off a vault I made to organize my own life. It might be a good starting point for you, but it will need a decent amount of work. I may not be responsive with pull requests as I'm not a developer and could have trouble validating any work. Instead, I recommend you take this template and run with it however you want in your own repos.
 
 This vault ships with sample data so every widget is alive the moment you open it. Clear it out and it becomes yours.
 
