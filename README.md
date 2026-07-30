@@ -55,4 +55,4 @@ These third-party plugins are not included in this download. Each is maintained 
 
 ## License
 
-MIT for the original code, styles, sample notes, and the bundled Storm Wind-Down plugin. See `LICENSE`. The community plugins it depends on are licensed separately by their authors.
+I don't care what you do with it. Remember, with great vault comes great responsibility.
