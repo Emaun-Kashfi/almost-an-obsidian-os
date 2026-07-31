@@ -1,0 +1,11 @@
+# Scratch / transfer files
+.__*
+
+# macOS
+.DS_Store
+
+# Obsidian per-user layout & cache (never publish these)
+.obsidian/workspace*.json
+**/.obsidian/workspace*.json
+.trash/
+**/.trash/

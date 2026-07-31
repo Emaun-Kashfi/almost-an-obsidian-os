@@ -8,6 +8,7 @@ tags:
 ```dataviewjs
 try {
 const box = this.container;
+const HLC = {}; dv.pages("#highlight").array().forEach(h => { const k=(h.book&&h.book.path)?h.book.path:""; if(k) HLC[k]=(HLC[k]||0)+1; });
 
 // resolve a book's cover → resource URL (Cover frontmatter, or Reading/Covers/<name>.<ext>)
 function resolveCover(p){
@@ -39,7 +40,7 @@ const books = dv.pages("#book").array().map(p => {
   extra.forEach(t => keys.push("tag:" + t.toLowerCase()));
   return { title: p.title || p.file.name, author: p.author || "", pct: Number(p.progress) || 0,
     color: p.color || "linear-gradient(160deg,#2f6f8a,#12303f)", cover: resolveCover(p),
-    status, extra, link: p.file.path, keys };
+    status, extra, link: p.file.path, keys, page: Number(p.page)||0, pages: Number(p.pages)||0, hl: HLC[p.file.path]||0 };
 }).sort((a,b) => (order[a.status] ?? 5) - (order[b.status] ?? 5) || b.pct - a.pct || a.title.localeCompare(b.title));
 
 const statusVals = [...new Set(books.map(b => b.status).filter(Boolean))];
@@ -59,7 +60,7 @@ const cards = books.map((b,i) => {
     <div class="tt">${esc(b.title)}</div>
     ${b.author ? `<div class="au">${esc(b.author)}</div>` : ""}
     <div class="bar"><span style="width:${Math.max(0,Math.min(100,b.pct))}%"></span></div>
-    <div class="pc">${b.pct}%${b.status === "reading" ? " · in progress" : ""}</div>
+    <div class="pc">${b.pct}%${b.pages?` · p.${b.page}/${b.pages}`:""}${b.hl?` · ✎ ${b.hl}`:""}</div>
   </div>`;
 }).join("");
 

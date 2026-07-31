@@ -1,0 +1,9 @@
+{
+  "id": "storm-winddown",
+  "name": "Storm Wind-Down",
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "description": "A vault-wide wind-down warning at 9:30 PM that turns obnoxious at 10:30 PM. Dismiss for the night by typing the opening paragraph of Moby-Dick, or wait until 2 AM.",
+  "author": "Storm Vault",
+  "isDesktopOnly": false
+}

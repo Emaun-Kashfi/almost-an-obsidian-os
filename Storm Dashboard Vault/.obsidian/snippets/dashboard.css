@@ -1,0 +1,101 @@
+/* =====================================================================
+   Personal Productivity — dashboard snippet
+   Enable at: Settings → Appearance → CSS snippets → toggle "dashboard" on.
+   Styling is scoped to notes with `cssclasses: [dashboard]` so it never
+   touches your other notes. Works with Minimal and the default theme.
+   ===================================================================== */
+
+/* ---- Greeting header ---- */
+.dash-greeting {
+  margin-bottom: 0.05em;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.dash-date {
+  margin-top: 0.1em;
+  color: var(--text-muted);
+  font-size: 0.95em;
+}
+
+/* ---- Nav callout → pill buttons ---- */
+.callout[data-callout="nav"] {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0.4em 0 1.2em;
+  box-shadow: none;
+}
+.callout[data-callout="nav"] .callout-title {
+  padding: 0;
+  color: var(--text-faint);
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.callout[data-callout="nav"] .callout-title .callout-icon { display: none; }
+.callout[data-callout="nav"] .callout-content { margin-top: 0.4em; }
+.callout[data-callout="nav"] a.internal-link {
+  display: inline-block;
+  margin: 0 0.4em 0.4em 0;
+  padding: 0.34em 0.72em;
+  border-radius: 0.7em;
+  background: var(--background-modifier-hover);
+  border: 1px solid var(--background-modifier-border);
+  color: var(--text-normal);
+  text-decoration: none;
+  font-size: 0.88em;
+  font-weight: 600;
+  transition: background 0.12s ease, color 0.12s ease, transform 0.06s ease;
+}
+.callout[data-callout="nav"] a.internal-link:hover {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+  transform: translateY(-1px);
+}
+
+/* ---- Dashboard section headers ---- */
+.dashboard .markdown-preview-view h2,
+.dashboard.markdown-source-view h2 {
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding-bottom: 0.2em;
+  margin-top: 1.4em;
+}
+
+/* ---- Tables (Dataview output) as soft cards ---- */
+.dashboard table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9em;
+}
+.dashboard th {
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.82em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.dashboard tbody tr {
+  transition: background 0.1s ease;
+}
+.dashboard tbody tr:hover {
+  background: var(--background-modifier-hover);
+}
+.dashboard td { padding: 0.4em 0.6em; }
+
+/* progress bars rendered as inline code look tidier flush-left */
+.dashboard td code {
+  background: transparent;
+  padding: 0;
+  color: var(--interactive-accent);
+  letter-spacing: -1px;
+}
+
+/* ---- Hide #habit tags in reading view (they're just plumbing) ---- */
+.markdown-rendered a.tag[href^="#habit"] { display: none; }
+
+/* ---- Heatmap sits a little nicer ---- */
+.dashboard .heatmap-calendar-graph { margin-top: 0.4em; }

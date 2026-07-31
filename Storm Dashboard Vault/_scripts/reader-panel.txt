@@ -1,18 +1,3 @@
----
-tags:
-  - book
-title: Project Hail Mary
-author: Andy Weir
-status: done
-progress: 100
-page: 496
-pages: 496
-Cover: 
-File: 
----
-
-# Project Hail Mary
-
 ```dataviewjs
 try {
 const me = dv.current();
@@ -205,15 +190,3 @@ function wire(){
 render();
 } catch(err){ this.container.innerHTML = '<div style="color:#e0736b;padding:14px;font-family:sans-serif">📖 Reader error: '+err.message+'</div>'; console.error(err); }
 ```
-
-## Highlights
-
-> Paste quotes here as you read (or wrap phrases in ==marks==), then hit **Pull inline** in the panel above to turn them into their own linked notes.
-
-
-[[📚 Books|← Books]]
-
-**Author:** Andy Weir
-
-## Notes
-- Example book — update progress and status in the properties.

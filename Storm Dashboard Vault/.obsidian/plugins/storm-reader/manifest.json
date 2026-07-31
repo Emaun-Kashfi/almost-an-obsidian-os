@@ -1,0 +1,9 @@
+{
+  "id": "storm-reader",
+  "name": "Storm Reader",
+  "version": "1.1.0",
+  "minAppVersion": "1.4.0",
+  "description": "Reading companion: select-to-highlight popup with colored types, auto-bookmark your page in PDFs, and look up book details from Open Library. Part of the Storm dashboard vault.",
+  "author": "Storm Vault",
+  "isDesktopOnly": false
+}

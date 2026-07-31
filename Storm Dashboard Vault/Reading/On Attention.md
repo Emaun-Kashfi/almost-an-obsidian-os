@@ -1,17 +1,19 @@
 ---
 tags:
   - book
-title: Project Hail Mary
-author: Andy Weir
-status: done
-progress: 100
-page: 496
-pages: 496
-Cover: 
-File: 
+title: On Attention
+author: A. Reader
+status: reading
+page: 0
+pages: 9
+progress: 0
+cssclasses:
+  - reading-mode
 ---
 
-# Project Hail Mary
+# On Attention
+
+[[📚 Books|← Books]]
 
 ```dataviewjs
 try {
@@ -206,14 +208,34 @@ render();
 } catch(err){ this.container.innerHTML = '<div style="color:#e0736b;padding:14px;font-family:sans-serif">📖 Reader error: '+err.message+'</div>'; console.error(err); }
 ```
 
+## I. The Cost of a Divided Mind
+
+Attention is the rarest and purest form of generosity, and we spend it more carelessly than any other thing we own. A morning can pass in a hundred small glances, each one a coin dropped through a grate. By noon the purse is empty, and we cannot say what we bought with it.
+
+The divided mind believes it is being efficient. It is not. It is only being busy, and busyness is the counterfeit of progress. What the scattered hour produces looks like work and weighs like work, but it does not move the stone.
+
+To do one thing fully is to refuse a thousand things quietly. That refusal is where the day's real strength is stored.
+
+## II. On Building the Quiet Room
+
+You do not find deep attention; you build a room for it. The room has a door that closes, an hour that repeats, and a single task waiting on the table. Everything else is asked, politely, to wait outside.
+
+The first ten minutes in the room are always the worst. The mind, used to being fed every few seconds, grows restless and invents emergencies. Sit through the restlessness. On the far side of it is a stillness you had forgotten you were capable of.
+
+Do this daily and the room begins to build itself. The hour arrives and the mind, like a dog that knows the leash, walks itself to the door.
+
+## III. The Long Patience
+
+Every worthwhile thing is made of more patience than the maker expected to need. We imagine the finished work and forget the ten thousand dull repetitions that stand between us and it.
+
+Progress is not a straight climb. It is a series of small, testable steps, most of which teach you only what does not work. This is not failure. It is the ordinary shape of learning, and the sooner you make peace with it, the further you will go.
+
+Begin badly, then. A poor first page can be fixed; a blank one cannot. The patience to be a beginner, again and again, is the quietest form of courage there is.
+
 ## Highlights
 
-> Paste quotes here as you read (or wrap phrases in ==marks==), then hit **Pull inline** in the panel above to turn them into their own linked notes.
-
-
-[[📚 Books|← Books]]
-
-**Author:** Andy Weir
+> Select text for the highlight popup, or paste quotes here and hit Pull inline.
 
 ## Notes
-- Example book — update progress and status in the properties.
+
+- 
