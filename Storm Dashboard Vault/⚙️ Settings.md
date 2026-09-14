@@ -145,3 +145,25 @@ render();
   console.error(err);
 }
 ```
+
+## 📊 Vault stats
+
+```dataviewjs
+try {
+  const notes = app.vault.getMarkdownFiles().length;
+  const allFiles = app.vault.getFiles().length;
+  const attachments = Math.max(0, allFiles - notes);
+  let folders = 0; try { folders = app.vault.getAllLoadedFiles().filter(f => f && f.children !== undefined).length - 1; } catch(e){}
+  let tags = 0; try { tags = Object.keys(app.metadataCache.getTags()).length; } catch(e){}
+
+  dv.container.innerHTML = `<div class="storm-settings-stats"><div class="stats">
+    <div class="stat"><div class="n">${notes}</div><div class="l">Notes</div></div>
+    <div class="stat"><div class="n">${attachments}</div><div class="l">Attachments</div></div>
+    <div class="stat"><div class="n">${Math.max(0, folders)}</div><div class="l">Folders</div></div>
+    <div class="stat"><div class="n">${tags}</div><div class="l">Tags</div></div>
+  </div></div>`;
+} catch(err){
+  dv.container.innerHTML = '<div style="color:#e0736b;padding:12px;font-family:sans-serif">📊 Vault stats error: '+err.message+'</div>';
+  console.error(err);
+}
+```

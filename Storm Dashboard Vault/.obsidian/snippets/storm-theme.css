@@ -1,0 +1,8 @@
+/* storm-theme.css — GENERATED. The Storm Dashboard rewrites this file whenever
+   the theme changes (⚙️ Settings → Theme / Match image). Every palette block in
+   storm.css reads var(--storm-*, <default>), so these definitions paint every
+   Storm surface in the vault — goal notes, task notes, 🎯 Goals, 📋 Tasks,
+   🧹 Triage and the daily tables — not just the Dashboard.
+   This is the built-in default palette: identical to the fallbacks in storm.css,
+   so a fresh vault looks exactly as it would with no theme file at all. */
+body:not(.theme-light){--storm-bg:#0a0d11;--storm-surface:#141b23;--storm-surface2:#1a222c;--storm-track:#0f161d;--storm-border:rgba(126,158,186,.14);--storm-border2:rgba(126,158,186,.26);--storm-text:#e8eff6;--storm-dim:#9db0c1;--storm-faint:#8899a9;--storm-accent:#5ec8e8;--storm-accent2:#a7e9fb;--storm-accent-deep:#2b8fb5;--storm-glow:rgba(94,200,232,.45);--storm-btn:linear-gradient(180deg,#297893,#22718e);--storm-on-accent:#eafaff;--storm-accent-rgb:94,200,232;--storm-warm:#e0a458;--storm-good:#63d3b0}

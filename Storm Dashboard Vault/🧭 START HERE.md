@@ -48,20 +48,28 @@ These are the usual reason a vault "shows code instead of a dashboard."
 - **Your name:** open `Dashboard`, and in its properties (top of the note) set **name** to your own. The greeting uses it.
 - **Theme:** the dashboard's ⚙️ **Settings** pill (top nav) has two theme modes. **Community theme** (the default) makes the dashboard follow whatever Obsidian theme you have installed. **Match image** builds the dashboard's colors from your banner image instead. Pick either.
 - **Banner:** in ⚙️ Settings, choose a banner or **Upload an image** to drop your own into `Images/Banner/`.
-- **Clear the sample data** when you're ready: the notes in `Daily/`, `Job Search/Applications/`, `Recipes/`, `Reading/`, `Projects/`, and `Job Search/Organizations/` are examples. Delete them and add your own; the dashboard updates itself.
+- **Clear the sample data** when you're ready: the notes in `Daily/`, `Job Search/Applications/`, `Recipes/`, `Reading/`, `Goals/`, `Tasks/`, and `Job Search/Organizations/` are examples. Delete them and add your own; the dashboard updates itself.
 
 ## 6. Your daily flow
 
 1. Launch Obsidian → you land on the **Dashboard**.
 2. Click **Today's note** (or a Calendar day) → a fresh daily note is created and auto-filled.
 3. Set your **🎯 One thing**, add tasks, tick habits as you go.
-4. Add a task from the dashboard's Today card, or in the daily note with a 📅 due date so it surfaces on the day.
+4. The ⚡ **Now** card lists each active task's *next move* — the earliest dated sub-task that is still open. Tick it there, or type into the card's add box (`task:`, `sub:`, `goal:`, or plain text for today's inbox).
 5. Star a job, log a workout, run a focus session — all from the dashboard.
+
+## Goals → tasks → sub-tasks
+
+Work lives in three layers. A **goal** note (`Goals/`) is an outcome with an area and a target date; it carries a Gantt of the tasks that point to it. A **task** note (`Tasks/`) is one chunk of work assigned to a goal, with `start` and `end` dates in its properties. **Sub-tasks** are plain checkboxes under the task note's `## Sub-tasks` heading — give one a `📅 YYYY-MM-DD` date and it becomes that task's next move on the Dashboard.
+
+Every task note opens with a **📆 Timeline**: a small Gantt of its own sub-tasks, one row per checkbox. A bar runs from the previous sub-task's deadline (or the task's start) to its own 📅 date; add `🛫 YYYY-MM-DD` to a sub-task to pin an explicit start. Sub-tasks with no date are spread evenly across the task's start→end window as dashed *projected* bars — click one to accept that date and it is written into the line. Click a box in the chart to check a sub-task off (it stamps today's ✅ date on the line; unchecking removes it), and the ＋ row at the bottom adds a new sub-task. Without an `end` date on the task, undated sub-tasks appear as chips under the chart instead.
+
+Create all three from the dashboard's add box — `goal: Name @Area 2026-12-31`, `task: Name @Goal 9/15-10/10`, `sub: Text 9/18 -> Task` — or with Templater's **Goal** and **Task** templates. New task notes get the Timeline automatically.
 
 ## 7. Add your own data
 
 - **A job:** type "Company — Role" into the Job Search card, or use **➕ Quick Add**.
-- **A project:** Cmd-P → *Templater: Create new note from template* → **Project Template**. It joins the Projects board automatically.
+- **A goal or a task:** type `goal: …` or `task: …` into the dashboard's add box, or Cmd-P → *Templater: Create new note from template* → **Goal** / **Task**. Tasks join their goal's Gantt automatically.
 - **A recipe:** **Recipe Template** into `Recipes/`. Keep ingredients as a bullet list; the Shopping List reads them.
 - **Anything:** the **➕ Quick Add** note has a form for jobs, recipes, books, projects, notes, and organizations.
 
@@ -71,6 +79,7 @@ These are the usual reason a vault "shows code instead of a dashboard."
 - **A new daily note is full of `<% %>`** → Templater's "Trigger on new file creation" is off, or the template folder isn't `_templates` (Step 2).
 - **The heatmap says to install the plugin** → install **Heatmap Calendar**, then tick a few habits in daily notes so there's data.
 - **Nav buttons look like plain text / cards look unstyled** → enable the **storm** and **dashboard** CSS snippets (Step 3).
+- **A task's 📆 Timeline says "No sub-tasks yet"** → the note has no checkboxes under its `## Sub-tasks` heading; add one with the ＋ row.
 
 ## How it was built
 

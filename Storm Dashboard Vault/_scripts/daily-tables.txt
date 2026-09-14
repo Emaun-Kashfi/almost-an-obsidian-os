@@ -1,26 +1,3 @@
----
-date: <% tp.date.now("YYYY-MM-DD") %>
-tags:
-  - daily
----
-<%* await tp.file.rename(tp.date.now("YYYY-MM-DD") + " " + tp.date.now("dddd")) -%>
-
-# <% tp.date.now("dddd, MMMM D") %>
-
-[[Dashboard|← Dashboard]]　·　[[Weekly Notes/<% tp.date.now("GGGG-[W]WW") %>|This week]]
-
-## 🎯 One thing
-> The single thing that would make today a win.
-
-→ 
-
-## ⚡ Tasks
-> One-off actions only — anything that belongs to a goal lives in its own note under `Tasks/`. Type below to add, or use the add box on your dashboard. Add a 📅 date to surface it on the day. Whatever is still unchecked here shows up in the Dashboard's Inbox for 7 days.
-
-- [ ] 
-
-## 📅 Planned today
-
 ```dataviewjs
 // ── 📅 Planned today ──────────────────────────────────────────────────────────
 // Every sub-task in a Tasks/ task note whose 📅 date is THIS note's day.
@@ -84,12 +61,21 @@ try {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) {
     dv.paragraph("_Couldn't read this note's day — add a `date: YYYY-MM-DD` property._");
   } else {
+    // PAUSE §3 — a paused goal's tasks plan no work either (the cascade is computed,
+    // never written), so collect the paused goals once and skip anything under them.
+    const pausedGoals = new Set();
+    for (const g of dv.pages('"Goals"').where(p => p && p.type === "goal").array()) {
+      if (EXCL.test(g.file.path)) continue;
+      if (String(g.status == null ? "" : g.status).toLowerCase().trim() === "paused")
+        pausedGoals.add(String(g.file.path).toLowerCase());
+    }
     const rows = [];
     for (const pg of dv.pages('"Tasks"').where(p => p.type === "task").array()) {
       if (EXCL.test(pg.file.path)) continue;                     // never read templates/archives
-      const status = String(pg.status == null ? "" : pg.status).toLowerCase();
+      const status = String(pg.status == null ? "" : pg.status).toLowerCase().trim();
       if (status === "done") continue;                            // finished tasks don't plan work
       const gp = goalPathOf(pg);
+      if (status === "paused" || (gp && pausedGoals.has(String(gp).toLowerCase()))) continue;
       for (const t of subsOf(pg)) {
         if (iso(t.due) !== day) continue;
         rows.push({
@@ -122,9 +108,7 @@ try {
   dv.paragraph("**📅 Planned today — error:** " + ((e && e.message) ? e.message : String(e)));
 }
 ```
-
-## ✅ Done today
-
+<!-- SPLIT -->
 ```dataviewjs
 // ── ✅ Done today ─────────────────────────────────────────────────────────────
 // Sub-tasks whose ✅ date is THIS note's day, plus whole task notes whose
@@ -260,35 +244,3 @@ try {
   dv.paragraph("**✅ Done today — error:** " + ((e && e.message) ? e.message : String(e)));
 }
 ```
-
-## 🔥 Habits
-> Check what you did. These feed your heatmap & streaks automatically. Add new habits from the dashboard's **+ Add a habit** box and they'll appear here too.
-
-- [ ] 🏃 Move / exercise #habit/move
-- [ ] 💧 Water #habit/water
-- [ ] 📖 Read #habit/read
-- [ ] 🧠 Learn something #habit/learn
-- [ ] 😴 Sleep prep #habit/sleep
-
-## 🏋️ Workout
-```dataviewjs
-try {
-  const cur = dv.current();
-  const w = dv.page("🏋️ Workouts");
-  const names = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-  let wd = "";
-  try { wd = cur.date ? cur.date.toFormat("cccc") : ""; } catch(e){}
-  if (!wd) { const d = new Date((cur.file.name.slice(0,10)) + "T00:00"); if (!isNaN(d)) wd = names[d.getDay()]; }
-  const sess = (w && w.schedule && wd) ? (w.schedule[wd] || "Rest") : "Rest";
-  if (String(sess).toLowerCase() === "rest") dv.paragraph("😴 **Rest day** — light mobility & good sleep.");
-  else dv.paragraph("💪 **Today: " + sess + "** — open [[" + sess + "]] for the full session, or tap **＋ Log in today's note** on your [[Dashboard]] to drop the checklist here.");
-} catch(e) { dv.paragraph("_Set up your weekly plan in [[🏋️ Workouts]]._"); }
-```
-
-## 📝 Notes
-
-
-## 🌙 Shutdown
-**Win of the day:** 
-
-**One next step on anything I touched:** 

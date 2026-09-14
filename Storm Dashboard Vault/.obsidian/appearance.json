@@ -1,9 +1,10 @@
 {
+  "accentColor": "",
   "cssTheme": "",
   "enabledCssSnippets": [
+    "dashboard",
     "storm",
-    "dashboard"
+    "storm-theme"
   ],
-  "theme": "obsidian",
-  "accentColor": ""
+  "theme": "obsidian"
 }

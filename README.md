@@ -10,11 +10,11 @@ This vault ships with sample data so every widget is alive the moment you open i
 
 ## What's inside
 
-- **One dashboard note** that gathers from across the vault and renders a Today card, a focus timer, a month calendar, a habit heatmap, today's workout, a job pipeline, a projects board, a reading shelf, and a mini graph.
+- **One dashboard note** that gathers from across the vault and renders a Today card, a focus timer, a month calendar, a habit heatmap, today's workout, a job pipeline, goals and their next moves, a reading shelf, and a mini graph.
 - **A job tracker** with a status pipeline (saved → applied → screen → interview → final → offer), inline status dropdowns, starring, and per-role notes.
 - **Recipes → meal planner → shopping list**, one source feeding three views.
 - **A reading shelf** with cover cards and progress bars.
-- **A projects board** that auto-lists every project and draws a progress bar from its checklist.
+- **Goals → tasks → sub-tasks.** Goal notes carry a Gantt of the tasks that point to them; every task note carries a 📆 Timeline of its own sub-tasks — bars from real 📅 dates, dashed projected bars for undated ones (click to accept a date), and click-to-check boxes. The dashboard's ⚡ Now card shows each active task's next move.
 - **A habit system** built entirely from `#habit/*` checkboxes in your daily notes. No habit database; the checkbox is the record.
 - **A six-day training plan** with looping GIF form demos for each exercise.
 - **Two theme modes.** *Community theme* makes the dashboard follow whatever Obsidian theme you have installed. *Match image* builds the dashboard's colors from your banner image, going light or dark to match it, contrast-corrected to WCAG AA. Switch in the dashboard's ⚙️ Settings.
