@@ -40,10 +40,10 @@ if (typeof renderHeatmapCalendar !== "function") {
 const habits = [
   { tag: "#habit/move",     label: "🏋️ Move / exercise" },
   { tag: "#habit/language", label: "🗣️ Language" },
-  { tag: "#habit/quran",    label: "📖 Qur'an / faith" },
+  { tag: "#habit/read",     label: "📖 Read" },
   { tag: "#habit/water",    label: "💧 Water" },
   { tag: "#habit/sleep",    label: "😴 Sleep prep" },
-  { tag: "#habit/meals}",    label: "🍽️ Log meals" },
+  { tag: "#habit/meals",    label: "🍽️ Log meals" },
 ];
 const daily = dv.pages('"Daily"').where(p => p.file.tasks.length);
 const isoOf = p => p.date ? p.date.toISODate() : p.file.name.slice(0,10);
@@ -94,10 +94,10 @@ dv.table(["Habit", "Current streak", "Record", "All-time"], rows);
 const habits = [
   { tag: "#habit/move",     label: "🏋️" },
   { tag: "#habit/language", label: "🗣️" },
-  { tag: "#habit/quran",    label: "📖" },
+  { tag: "#habit/read",     label: "📖" },
   { tag: "#habit/water",    label: "💧" },
   { tag: "#habit/sleep",    label: "😴" },
-  { tag: "#habit/meals}",    label: "🍽️" },
+  { tag: "#habit/meals",    label: "🍽️" },
 ];
 const daily = dv.pages('"Daily"').where(p => p.file.tasks.length);
 const isoOf = p => p.date ? p.date.toISODate() : p.file.name.slice(0,10);

@@ -1,0 +1,82 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   tests/G2/reference-line-surgery.txt — the sub-task line surgery, as it was
+   FIRST written (sections 13 and 14 of the original task-gantt source).
+
+   This is a pin, not a copy to edit. common/_scripts/task-gantt.js has grown a
+   lot since — a paused state, a resume bar, an accessibility pass — but the
+   code that finds a checkbox line in a note and rewrites it has to stay exactly
+   this, because every other surface that ticks a box calls into it. tests/G2
+   compares the shipped file's sections 13-14 against this file character for
+   character. If you genuinely need to change the line surgery, change it in
+   task-gantt.js, re-run every suite, and only then update this file — in the
+   same commit, with the reason in dev/DEVLOG.md.
+   ══════════════════════════════════════════════════════════════════════════ */
+/* ── 13. line surgery (Dashboard.md lines 627–639, reproduced) ────────────── */
+const BLOCKID = /(\s+\^[A-Za-z0-9-]+)\s*$/;
+function stampAtEnd(ln, suffix){
+  const m = String(ln).match(BLOCKID);
+  return m ? String(ln).slice(0, m.index).replace(/\s*$/,"") + suffix + m[1]
+           : String(ln).replace(/\s*$/,"") + suffix;
+}
+const isoToday = () => { const dt=new Date(); return dt.getFullYear()+"-"+two(dt.getMonth()+1)+"-"+two(dt.getDate()); };
+const stampDone = ln => /✅/.test(ln) ? ln : stampAtEnd(ln, " ✅ " + isoToday());
+const stripDone = ln => String(ln).replace(/\s*✅\s*\d{4}-\d{2}-\d{2}/, "").replace(/\s+$/,"");
+const refresh = () => { try { app.metadataCache.trigger("dataview:refresh-views"); } catch(e){} };
+
+/* ── 14. toggle ───────────────────────────────────────────────────────────── */
+const isBox = l => /^\s*[-*]\s*\[[ xX]\]/.test(l||"");
+const norm = s => String(s||"").replace(/\s+/g," ").trim().toLowerCase();
+/* the checkbox line's own text, cleaned the same way data-toggle-text was */
+const boxText = l => norm(clean(String(l||"").replace(/^\s*[-*]\s*\[[ xX]\]\s?/, "")));
+const notify = msg => { try { const ob = require("obsidian"); new ob.Notice(msg, 5000); } catch(e){ console.warn(msg); } };
+/* Resolve the line to edit. The recorded line wins when it is still the SAME sub-task
+   (exact cleaned text — never a substring, so `Step 1` can never hit `Step 10`). When the
+   note shifted underneath the chart, fall back to the one line with exactly that text;
+   zero or several candidates → refuse and redraw rather than guess. */
+function findLine(lines, line, text){
+  const want = norm(text);
+  const at = Number(line);
+  if(at >= 0 && at < lines.length && isBox(lines[at]) && want && boxText(lines[at]) === want) return at;
+  if(!want) return -1;
+  const hits = []; lines.forEach((l,i) => { if(isBox(l) && boxText(l) === want) hits.push(i); });
+  if(hits.length === 1) return hits[0];
+  notify(hits.length ? "Two sub-tasks have the same text — edit that one in the note itself." : "That sub-task moved — the chart is refreshing, try again.");
+  refresh();
+  return -1;
+}
+let busy = false;
+async function toggleLine(line, text){
+  if(busy) return; busy = true;
+  try{
+    const f = app.vault.getAbstractFileByPath(NOTE); if(!f) return;
+    const lines = (await app.vault.read(f)).split("\n");
+    const target = findLine(lines, line, text);
+    if(target < 0) return;
+    let ln = lines[target];
+    const cr = /\r$/.test(ln) ? "\r" : ""; if(cr) ln = ln.slice(0,-1);
+    ln = /\[[xX]\]/.test(ln) ? stripDone(ln.replace(/\[[xX]\]/, "[ ]"))
+                             : stampDone(ln.replace(/\[\s\]/, "[x]"));
+    lines[target] = ln + cr;
+    await app.vault.modify(f, lines.join("\n"));
+    refresh();
+  } catch(e){ console.error("task-gantt toggle", e); }
+  finally { busy = false; }
+}
+
+/* ── 14b. promote a projected slot to a real 📅 (click on the bar) ────────── */
+async function setDue(line, text, date){
+  if(busy) return; busy = true;
+  try{
+    const f = app.vault.getAbstractFileByPath(NOTE); if(!f) return;
+    const lines = (await app.vault.read(f)).split("\n");
+    const target = findLine(lines, line, text);
+    if(target < 0) return;
+    let ln = lines[target];
+    if(/📅/.test(ln)) return;                        // already dated — leave it alone
+    const cr = /\r$/.test(ln) ? "\r" : ""; if(cr) ln = ln.slice(0,-1);
+    lines[target] = stampAtEnd(ln, " 📅 " + date) + cr;
+    await app.vault.modify(f, lines.join("\n")); refresh();
+  } catch(e){ console.error("task-gantt set-due", e); }
+  finally { busy = false; }
+}
+

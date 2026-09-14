@@ -1,0 +1,43 @@
+{
+  "_README": [
+    "The single list of strings that must never appear anywhere in this public repo.",
+    "This file is the ONE place the terms are written down. The leak scanner",
+    "(dev/scripts/leakscan.py), the build (dev/integrate.py) and the test guards in",
+    "tests/V and tests/B2 all read it, so nobody has to retype a pattern and no copy",
+    "can drift. The scanner skips this file and itself and says so in its output.",
+    "",
+    "Patterns are JavaScript/Python-compatible regular expressions, matched",
+    "case-insensitively against the whole text of every file in the repo.",
+    "Add a pattern here rather than in the code that checks it."
+  ],
+
+  "religious": [
+    "qur.?an", "juz\\b", "masjid", "islam", "mosque", "prayer", "religio", "\\bfaith\\b"
+  ],
+
+  "identity": [
+    "emaunkashfi", "@pm\\.me", "\\bemaun\\b", "kaladin", "stormblessed",
+    "Personal Productivity"
+  ],
+
+  "employer": [
+    "newlife", "newliferx", "\\bPHI\\b", "pharmac", "prescrib", "dispens",
+    "work vault", "\\bcampaign", "compliance panel", "Brand/tokens", "frontmatter-shapes"
+  ],
+
+  "scratch": [
+    "\\brx[0-9]+\\b"
+  ],
+
+  "paths": [
+    "/home/claude", "/Users/[a-z]", "/mnt/user-data", "out/personal", "out/final"
+  ],
+
+  "notes": {
+    "religious": "tests/V has guarded the built template for these since SPEC §11; the export widens the guard to the whole repo.",
+    "identity": "the vault owner's name, e-mail, personal banner image and the name of their private vault.",
+    "employer": "a second, private build of this system exists for an employer, where a task is a marketing campaign with compliance fields. Neither its content nor the shape of it belongs here.",
+    "scratch": "rx2, rx3, rx4 … were the working directories this system was built in. A reference to one is a reference to a machine nobody else has.",
+    "paths": "absolute paths from the machine this was built on. Everything must resolve from the repo root instead, or a clone works nowhere."
+  }
+}

@@ -1,0 +1,10 @@
+#!/bin/sh
+# Storm Dashboard — development log, enforced.
+#
+# Refuses a commit that changes dev/ or "Storm Dashboard Vault/" without a new
+# top entry in dev/DEVLOG.md. Runs here rather than in pre-commit because this is
+# the first hook that can read the commit message, and therefore the only one
+# where "[skip devlog]" can work.
+#
+# Hooks are inert until someone runs `sh dev/hooks/install.sh`.
+exec sh "$(dirname "$0")/devlog-guard.sh" block "$1"

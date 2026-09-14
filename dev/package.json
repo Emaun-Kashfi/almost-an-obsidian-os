@@ -1,0 +1,22 @@
+{
+  "name": "storm-dashboard-dev",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Build and test harness for the Storm Dashboard Obsidian vault. See dev/README.md.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "python3 assemble_dashboard.py && python3 integrate.py",
+    "build:check": "python3 integrate.py --check",
+    "test": "bash scripts/run-tests.sh",
+    "test:a11y": "bash tests/W/run.sh",
+    "test:privacy": "python3 scripts/leakscan.py",
+    "hooks:install": "sh hooks/install.sh"
+  },
+  "devDependencies": {
+    "csstree-validator": "4.0.1",
+    "playwright": "1.63.0"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "_README": [
+    "A VARIANT is one vault this repo can build: the seed notes beside this file,",
+    "plus the frontmatter and two banner constants the Dashboard assembler bakes",
+    "into Dashboard.md. Everything shared between variants lives in dev/common/.",
+    "",
+    "This repo ships exactly one variant, `template`, and it is the vault at",
+    "`Storm Dashboard Vault/`. To keep a private vault of your own, add a sibling",
+    "directory (dev/<name>/) with its own variant.json and seeds, add it to",
+    ".gitignore, and build it with `npm run build -- --variant <name>`. No variant's",
+    "content lives in the build scripts — they only read this file."
+  ],
+
+  "vault": "Storm Dashboard Vault",
+  "label": "Storm Dashboard Vault (the published template)",
+
+  "dashboard": {
+    "frontmatter": [
+      "---",
+      "cssclasses:",
+      "  - storm-home",
+      "  - max",
+      "tags:",
+      "  - dashboard",
+      "name: there",
+      "stormMode: community",
+      "---"
+    ],
+    "nameExpr": "(_selfFm.name || \"there\")",
+    "bannerPath": "Images/System Images/storm-banner.png",
+    "bannerName": "storm-banner"
+  },
+
+  "writeAppearanceJson": true
+}

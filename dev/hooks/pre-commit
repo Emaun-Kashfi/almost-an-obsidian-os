@@ -1,0 +1,11 @@
+#!/bin/sh
+# Storm Dashboard — development log, early warning.
+#
+# Prints the DEVLOG requirement as soon as you commit, so you see it before the
+# editor opens rather than after. It does NOT refuse the commit: git runs
+# pre-commit before it writes the commit message, so "[skip devlog]" is not
+# readable here and refusing would take an escape hatch away. The commit-msg
+# hook beside this one does the refusing.
+#
+# Hooks are inert until someone runs `sh dev/hooks/install.sh`.
+exec sh "$(dirname "$0")/devlog-guard.sh" warn

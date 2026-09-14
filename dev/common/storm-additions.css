@@ -1,0 +1,862 @@
+/* ===== Goal/Task system additions (v1) ===== */
+/* Agent C — CSS for the Goal/Task rebuild (SPEC §9). Append verbatim to the end of
+   storm.css. Covers:
+     1. Shared palette for STANDALONE notes (goal panel / daily tables / triage /
+        goals index / tasks board) — these live in normal notes, not inside
+        .storm-hub, so they redeclare the same design tokens locally, exactly the
+        way .bm / .jsm / .wm / .qa already do above for their own MOC pages.
+     2. .dashboard note chrome (full width, hide inline-title) for the three
+        notes that declare `cssclasses: [dashboard]` (Goals index, Tasks board,
+        Triage). Goal notes and Daily notes stay normal notes — no .dashboard.
+     3. Dashboard-only widgets (action strip, hero one-thing, Now card, universal
+        add, shutdown, goal card, pulse card, reference collapse) — scoped under
+        .storm-hub, matching how buildHub.js actually nests them.
+     4. Health badge `.hb` and `.nm-date` — small reusable atoms referenced from
+        BOTH the dashboard and Triage, so they are defined unscoped and simply
+        inherit the right --good/--warm/--behind from whichever root wraps them.
+     5. Goal panel / Gantt, daily tables, triage tool, goals index, tasks board.
+   Dark values first, `.theme-light` (e-ink) override immediately after each
+   component — the same interleaving used by the newest sections above
+   (INLINE ADD / DELETE, Job Search, Quick Add). */
+
+/* ---------------------------------------------------------------------------
+   0. SHARED PALETTE — standalone roots (no .storm-hub ancestor required)
+   --------------------------------------------------------------------------- */
+.storm-hub,
+.dashboard, .goalpanel, .dt-wrap, .triage, .goalsidx, .tasksboard {
+  /* "Behind"/overdue urgency colour: a red-shifted --warm. Plain fallback line
+     first for engines without color-mix() — see SPEC §9. */
+  --behind: var(--storm-behind,var(--warm));
+  --behind: var(--storm-behind,color-mix(in srgb, var(--warm) 60%, #e0736b));
+}
+.dashboard, .goalpanel, .dt-wrap, .triage, .goalsidx, .tasksboard {
+  --bg:var(--storm-bg,#0a0d11); --surface:var(--storm-surface,#141b23); --surface2:var(--storm-surface2,#1a222c);
+  --border:var(--storm-border,rgba(126,158,186,.14)); --border2:var(--storm-border2,rgba(126,158,186,.26));
+  --text:var(--storm-text,#e8eff6); --dim:var(--storm-dim,#9db0c1); --faint:var(--storm-faint,#8899a9);
+  --accent:var(--storm-accent,#5ec8e8); --accent2:var(--storm-accent2,#a7e9fb); --accent-deep:var(--storm-accent-deep,#2b8fb5);
+  --glow:var(--storm-glow,rgba(94,200,232,.45)); --warm:var(--storm-warm,#e0a458); --track:var(--storm-track,#0f161d); --accent-rgb:var(--storm-accent-rgb,94,200,232); --good:var(--storm-good,#63d3b0);
+  --btn:var(--storm-btn,linear-gradient(180deg,#297893,#22718e)); --on-accent:var(--storm-on-accent,#eafaff);
+  color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.45;
+}
+.dashboard *, .goalpanel *, .dt-wrap *, .triage *, .goalsidx *, .tasksboard *{ box-sizing:border-box; }
+.dashboard a, .goalpanel a, .triage a, .goalsidx a, .tasksboard a{ color:inherit; text-decoration:none; }
+.theme-light .dashboard, .theme-light .goalpanel, .theme-light .dt-wrap,
+.theme-light .triage, .theme-light .goalsidx, .theme-light .tasksboard{
+  --accent-rgb:var(--storm-accent-rgb,0,0,0); --good:var(--storm-good,#0a7a52);
+  --bg:var(--storm-bg,#ffffff); --surface:var(--storm-surface,#ffffff); --surface2:var(--storm-surface2,#f3f3f3);
+  --border:var(--storm-border,#b9b9b9); --border2:var(--storm-border2,#000000);
+  --text:var(--storm-text,#000000); --dim:var(--storm-dim,#2a2a2a); --faint:var(--storm-faint,#565656);
+  --accent:var(--storm-accent,#000000); --accent2:var(--storm-accent2,#000000); --accent-deep:var(--storm-accent-deep,#000000);
+  --glow:var(--storm-glow,transparent); --warm:var(--storm-warm,#000000); --track:var(--storm-track,#d9d9d9);
+  --btn:var(--storm-btn,#000000); --on-accent:var(--storm-on-accent,#ffffff); --behind:var(--storm-behind,#000000);
+}
+
+/* ---------------------------------------------------------------------------
+   0b. .dashboard NOTE CHROME — applied to Goals index / Tasks board / Triage
+   only (they set cssclasses:[dashboard]; Goal notes and Daily notes do not,
+   so they stay normal notes with visible title/frontmatter/width).
+   --------------------------------------------------------------------------- */
+.dashboard{ --file-line-width:100% !important; --line-width:100% !important; --line-width-adaptive:100% !important; --max-width:100% !important; }
+.dashboard .inline-title, .dashboard .mod-header,
+.dashboard .metadata-container, .dashboard .markdown-preview-view .frontmatter{ display:none !important; }
+.dashboard .markdown-preview-sizer, .dashboard .markdown-preview-sizer > div,
+.dashboard .cm-sizer, .dashboard .cm-contentContainer, .dashboard .cm-content{ max-width:100% !important; width:100% !important; }
+.dashboard .markdown-preview-view{ padding:20px 28px !important; }
+.dashboard .block-language-dataviewjs{ padding:0 !important; }
+
+/* ---------------------------------------------------------------------------
+   1. HEALTH BADGE `.hb` — unscoped: used in the Now card, goal card, goal
+      panel head, goals index and tasks board alike.
+   --------------------------------------------------------------------------- */
+.hb{ display:inline-flex; align-items:center; font-size:10.5px; font-weight:750; text-transform:uppercase; letter-spacing:.04em; padding:2px 8px; border-radius:7px; white-space:nowrap; line-height:1.6; }
+/* CONTRACT §C F13: tint FROM the ink, so a repainted palette keeps the pair
+   together. rgb(99,211,176)/(224,164,88) are the default --good/--warm, so this
+   is pixel-identical in the shipped palette and only moves the derived ones. */
+.hb.ok{ color:var(--good); background:color-mix(in srgb, var(--good) 14%, transparent); }
+.hb.risk{ color:var(--warm); background:color-mix(in srgb, var(--warm) 16%, transparent); }
+.hb.behind{ color:var(--behind); background:color-mix(in srgb, var(--behind) 16%, transparent); }
+/* F3/F14: `opacity` here compounded with the paused-card dim down to 2.02:1.
+   The badge says DONE and now carries a hairline ring; neither is a colour. */
+.hb.done{ color:var(--good); background:color-mix(in srgb, var(--good) 8%, transparent); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--good) 42%, transparent); }
+.hb.unscheduled{ color:var(--faint); background:var(--surface2); }
+.theme-light .hb{ border:1px solid #000; background:#fff; color:#000; }
+.theme-light .hb.ok{ color:#0a7a52; border-color:#0a7a52; background:#fff; }
+.theme-light .hb.risk{ color:#000; border-width:2px; font-weight:800; }
+.theme-light .hb.behind{ background:#000; color:#fff; border-color:#000; font-weight:800; }
+.theme-light .hb.done{ color:#0a7a52; border-style:dashed; }
+.theme-light .hb.unscheduled{ color:#565656; border-color:#b9b9b9; }
+
+/* `.nm-date` — unscoped: reused verbatim on Triage's `.tr-due` (nm-date combo). */
+.nm-date{ font-size:11px; font-weight:700; color:var(--faint); white-space:nowrap; flex:none; font-variant-numeric:tabular-nums; }
+.nm-date.over{ color:var(--behind); }
+.nm-date.today{ color:var(--accent); font-weight:800; }
+.theme-light .nm-date.today{ text-decoration:underline; }
+
+/* =============================================================================
+   2. DASHBOARD-ONLY WIDGETS — scoped under .storm-hub (SPEC §3)
+   ============================================================================= */
+
+/* ---- §3.1 action strip (replaces the vault-stats strip) ---- */
+.storm-hub .actstrip{ display:grid; grid-template-columns:repeat(6,1fr); gap:8px; padding:10px 16px 4px; }
+.storm-hub .act{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 11px; min-width:0; cursor:default; transition:.12s; }
+.storm-hub .act[data-filter]:not([data-nofilter]){ cursor:pointer; }
+.storm-hub .act[data-filter]:not([data-nofilter]):hover{ border-color:var(--border2); background:var(--surface2); }
+.storm-hub .act .n{ font-size:19px; font-weight:800; letter-spacing:-.02em; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums; }
+.storm-hub .act .l{ font-size:10px; color:var(--faint); text-transform:uppercase; letter-spacing:.05em; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.storm-hub .act.hot{ border-color:rgba(224,115,107,.35); background:rgba(224,115,107,.07); }
+.storm-hub .act.hot .n{ color:var(--behind); }
+.storm-hub .act.active{ border-color:var(--accent-deep); background:rgba(var(--accent-rgb),.1); box-shadow:0 0 0 1px rgba(var(--accent-rgb),.3),0 0 16px -4px var(--glow); }
+.storm-hub .act.active .n, .storm-hub .act.active .l{ color:var(--accent2); }
+@container sh (max-width:700px){ .storm-hub .actstrip{ grid-template-columns:repeat(3,1fr); } }
+.theme-light .storm-hub .act.hot{ border-color:#000; border-width:2px; } /* --behind == --text == #000 in e-ink, so weight the border instead of relying on colour */
+.theme-light .storm-hub .act.hot .n{ color:#000; font-weight:800; }
+.theme-light .storm-hub .act.active{ background:#000; }
+.theme-light .storm-hub .act.active .n, .theme-light .storm-hub .act.active .l{ color:#fff; }
+
+/* ---- §3.2 hero "One thing" (inside the banner greet block) ---- */
+.storm-hub .banner .hero-one{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; cursor:pointer; margin:10px -10px 0; padding:6px 10px; border-radius:9px; transition:.12s; }
+.storm-hub .banner .hero-one:hover{ background:rgba(255,255,255,.08); }
+.storm-hub .banner .hero-one .k{ font-size:11px; font-weight:750; text-transform:uppercase; letter-spacing:.08em; color:#cfeaf5; text-shadow:0 1px 8px #000; flex:none; }
+.storm-hub .banner .hero-one .v{ font-size:16px; font-weight:700; color:#f4f8fb; text-shadow:0 2px 14px rgba(0,0,0,.75); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.storm-hub .banner .hero-one.unset .v{ color:#d7e0e9; font-weight:600; opacity:.85; }
+.storm-hub .banner .hero-one.editing{ cursor:default; background:transparent; }
+.storm-hub .banner .hero-one .one-inp{ font:inherit; font-size:15px; font-weight:650; color:#0a0d11; background:#f4f8fb; border:1.5px solid var(--accent2); border-radius:7px; padding:4px 9px; min-width:160px; max-width:100%; outline:none; box-shadow:0 4px 14px rgba(0,0,0,.35); }
+/* e-ink: banner image is hidden and the greet block sits on plain white, so the
+   dark-banner text colours above would be illegible — override to black. */
+/* CONTRACT §C F1: black ink is right only when the banner really is white —
+   `.brand-grad` keeps its gradient in light mode and gets light ink instead. */
+.theme-light .storm-hub .banner:not(.brand-grad) .hero-one .k,
+.theme-light .storm-hub .banner:not(.brand-grad) .hero-one .v{ color:#000; }
+.theme-light .storm-hub .banner:not(.brand-grad) .hero-one.unset .v{ color:#565656; }
+.theme-light .storm-hub .banner .hero-one:hover{ background:#f0f0f0; }
+.theme-light .storm-hub .banner .hero-one .one-inp{ color:#000; background:#fff; border-color:#000; box-shadow:none; }
+
+/* ---- §3.3 Now card shell ---- */
+.storm-hub .nowcard h3{ margin-bottom:11px; }
+.storm-hub .starttoday{ width:100%; font:inherit; font-size:13px; font-weight:750; color:var(--on-accent,#eafaff); background:var(--btn,linear-gradient(180deg,#297893,#22718e)); border:none; border-radius:10px; padding:10px 14px; margin-bottom:11px; cursor:pointer; box-shadow:0 0 18px -6px var(--glow); transition:.12s; }
+.storm-hub .starttoday:hover{ filter:brightness(1.08); }
+.storm-hub .starttoday:active{ transform:translateY(1px); }
+.theme-light .storm-hub .starttoday{ background:#000; color:#fff; box-shadow:none; }
+
+/* ---- §3.4 universal add box ---- */
+.storm-hub .uadd{ display:flex; align-items:center; gap:7px; margin-bottom:12px; }
+.storm-hub .uadd .addinput{ flex:1; min-width:0; }
+.storm-hub .uadd .help{ flex:none; width:20px; height:20px; border-radius:50%; border:1px solid var(--border2); color:var(--faint); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; cursor:help; user-select:none; transition:.12s; }
+.storm-hub .uadd .help:hover{ border-color:var(--accent-deep); color:var(--accent2); background:var(--surface2); }
+.theme-light .storm-hub .uadd .help{ border-color:#000; color:#000; }
+.theme-light .storm-hub .uadd .help:hover{ background:#ededed; }
+
+/* ---- §3.3 next-move groups ---- */
+.storm-hub .nm-group{ margin-top:6px; padding-top:10px; border-top:1px solid var(--border); }
+.storm-hub .nm-group:first-of-type{ margin-top:0; padding-top:0; border-top:none; }
+.storm-hub .nm-ghead{ display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:var(--text); padding:4px 2px 8px; flex-wrap:wrap; }
+.storm-hub .nm-ghead[data-link]{ cursor:pointer; }
+.storm-hub .nm-ghead[data-link]:hover{ color:var(--accent2); }
+
+/* ---- next-move / overdue / inbox rows ---- */
+.storm-hub .nm-row{ display:flex; align-items:center; flex-wrap:wrap; gap:4px 8px; padding:6px 4px; border-radius:8px; font-size:13px; position:relative; }
+.storm-hub .nm-row:hover{ background:var(--surface2); }
+.storm-hub .nm-row.is-over{ box-shadow:inset 3px 0 0 var(--behind); }
+.storm-hub .nm-row.is-today{ box-shadow:inset 3px 0 0 var(--accent); }
+.storm-hub .nm-row.done{ color:var(--dim); }
+.storm-hub .nm-row.done .nm-text{ text-decoration:line-through; color:var(--faint); }
+.storm-hub .nm-row.nm-sub{ padding-left:25px; font-size:12.5px; }
+.storm-hub .nm-row.nm-alldone{ color:var(--good); }
+.storm-hub .nm-row.nm-alldone .nm-text{ font-weight:650; }
+.storm-hub .nm-subs{ margin:2px 0 4px 8px; padding-left:8px; border-left:1.5px solid var(--border); }
+.theme-light .storm-hub .nm-row.is-over{ box-shadow:inset 3px 0 0 #000; }
+.theme-light .storm-hub .nm-row.is-today{ box-shadow:inset 3px 0 0 #000; text-decoration:underline; text-decoration-style:dotted; }
+
+.storm-hub .nm-box{ width:15px; height:15px; border-radius:5px; border:1.5px solid var(--border2); flex:none; cursor:pointer; position:relative; transition:.12s; }
+.storm-hub .nm-box:hover{ border-color:var(--accent); box-shadow:0 0 8px -2px var(--glow); }
+.storm-hub .nm-box.done{ background:var(--btn,var(--accent-deep)); border-color:transparent; }
+.storm-hub .nm-box.done::after{ content:"✓"; position:absolute; inset:0; font-size:10px; color:var(--on-accent,#eafaff); display:flex; align-items:center; justify-content:center; }
+.theme-light .storm-hub .nm-box{ border-color:#000; }
+.theme-light .storm-hub .nm-box.done{ background:#000; }
+
+.storm-hub .nm-text{ flex:1 1 140px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.storm-hub .nm-task{ flex:none; font-size:10.5px; font-weight:650; color:var(--dim); background:var(--surface2); border-radius:6px; padding:1.5px 7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px; }
+.storm-hub .nm-task:empty{ display:none; padding:0; }
+.storm-hub .nm-task[data-link]{ cursor:pointer; }
+.storm-hub .nm-task[data-link]:hover{ color:var(--accent2); }
+.theme-light .storm-hub .nm-task{ background:#f0f0f0; border:1px solid #ddd; }
+
+.storm-hub .nm-acts{ display:flex; align-items:center; gap:4px; margin-left:auto; flex:none; max-width:100%; opacity:0; transition:opacity .12s; }
+.storm-hub .nm-row:hover .nm-acts, .storm-hub .nm-row:focus-within .nm-acts{ opacity:1; }
+@media (hover:none){ .storm-hub .nm-acts{ opacity:1; } }
+.storm-hub .nm-act{ font:inherit; font-size:10.5px; font-weight:650; color:var(--dim); background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:3px 7px; cursor:pointer; white-space:nowrap; transition:.12s; }
+.storm-hub .nm-act:hover{ border-color:var(--accent-deep); color:var(--accent2); }
+.storm-hub .nm-acts .del{ flex:none; color:var(--faint); font-size:12px; line-height:1; padding:3px 6px; border-radius:6px; cursor:pointer; transition:.12s; }
+.storm-hub .nm-acts .del:hover{ color:#ef8079; background:rgba(224,115,107,.14); }
+.theme-light .storm-hub .nm-act{ border-color:#000; background:#fff; }
+.theme-light .storm-hub .nm-act:hover{ background:#000; color:#fff; }
+.theme-light .storm-hub .nm-acts .del:hover{ color:#000; background:#ededed; }
+
+.storm-hub .nm-markdone{ font:inherit; font-size:11px; font-weight:700; color:var(--on-accent,#eafaff); background:var(--btn,var(--accent-deep)); border:none; border-radius:7px; padding:5px 10px; cursor:pointer; white-space:nowrap; transition:.12s; }
+.storm-hub .nm-markdone:hover{ filter:brightness(1.1); }
+.theme-light .storm-hub .nm-markdone{ background:#000; color:#fff; }
+
+.storm-hub .nm-sec{ display:flex; align-items:center; gap:6px; font-size:10.5px; font-weight:750; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); margin:12px 0 4px; padding-top:10px; border-top:1px solid var(--border); }
+.storm-hub .nm-sec:first-child{ margin-top:0; padding-top:0; border-top:none; }
+.storm-hub .nm-sec span{ background:var(--surface2); color:var(--dim); border-radius:6px; padding:1px 6px; font-weight:700; font-variant-numeric:tabular-nums; }
+.storm-hub .nm-empty{ color:var(--faint); font-size:12.5px; padding:9px 2px; line-height:1.5; }
+.storm-hub .nm-empty b{ color:var(--dim); font-weight:700; }
+
+/* ---- row filtering (SPEC §9 last paragraph) ---- */
+.storm-hub .nowcard[data-filter="today"] .nm-row:not(.is-today){ display:none; }
+.storm-hub .nowcard[data-filter="over"] .nm-row:not(.is-over){ display:none; }
+.storm-hub .nowcard[data-filter="nm"] .nm-row:not([data-kind="next"]){ display:none; }
+.storm-hub .nowcard[data-filter="risk"] .nm-row:not(.is-risk){ display:none; }
+/* Note: hiding a .nm-sec/.nm-group header whose rows are ALL filtered out is not
+   achievable in pure CSS (no parent selector for "all my siblings are display:none")
+   — intentionally left as-is per SPEC §9. */
+
+/* ---- shutdown inline ---- */
+.storm-hub .shutdown{ display:flex; flex-direction:column; gap:7px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+.storm-hub .sd-row{ display:flex; align-items:center; gap:9px; }
+.storm-hub .sd-row label{ flex:none; width:78px; font-size:11px; color:var(--faint); font-weight:650; }
+.storm-hub .sd-inp{ flex:1; min-width:0; background:var(--track); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:12.5px; padding:6px 10px; outline:none; transition:.12s; font-family:inherit; }
+.storm-hub .sd-inp::placeholder{ color:var(--faint); }
+.storm-hub .sd-inp:focus{ border-color:var(--accent-deep); box-shadow:0 0 0 1px rgba(var(--accent-rgb),.25); background:var(--surface2); }
+.theme-light .storm-hub .sd-inp{ background:#fff; border-color:#000; }
+.theme-light .storm-hub .sd-inp:focus{ box-shadow:none; background:#f3f3f3; }
+
+/* ---- §3.5 goal card (replaces Projects) ---- */
+.storm-hub .goalcard .gc-row{ margin-bottom:13px; }
+.storm-hub .goalcard .gc-row:last-child{ margin-bottom:0; }
+.storm-hub .gc-top{ display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:650; margin-bottom:6px; flex-wrap:wrap; }
+.storm-hub .gc-name{ cursor:pointer; }
+.storm-hub .gc-name:hover{ text-decoration:underline; color:var(--accent2); }
+.storm-hub .gc-area{ margin-left:auto; font-size:11px; color:var(--faint); font-weight:500; }
+.storm-hub .gc-hb{ display:inline-flex; } /* safety net if markup ever wraps the .hb badge */
+.storm-hub .gc-bar{ display:block; height:8px; border-radius:6px; background:var(--track); overflow:hidden; }
+.storm-hub .gc-bar>span{ display:block; height:100%; border-radius:6px; background:linear-gradient(90deg,var(--accent-deep),var(--accent)); box-shadow:0 0 12px -3px var(--glow); }
+.storm-hub .gc-meta{ font-size:11px; color:var(--dim); margin-top:4px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.storm-hub .gc-gantt{ cursor:pointer; color:var(--accent); }
+.storm-hub .gc-gantt:hover{ text-decoration:underline; }
+.theme-light .storm-hub .gc-bar>span{ background:#000; box-shadow:none; }
+.theme-light .storm-hub .gc-gantt{ color:#000; font-weight:600; }
+
+/* ---- §3.5 pulse card ---- */
+.storm-hub .pulserow{ display:flex; gap:8px; margin-bottom:2px; }
+.storm-hub .pstat{ flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; background:var(--surface2); border:1px solid var(--border); border-radius:11px; padding:12px 6px; min-width:0; }
+.storm-hub .pn{ font-size:20px; font-weight:800; letter-spacing:-.02em; line-height:1.1; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.storm-hub .pl{ font-size:10px; color:var(--faint); text-transform:uppercase; letter-spacing:.05em; margin-top:4px; }
+.theme-light .storm-hub .pstat{ border-color:#bbb; }
+
+/* ---- §3.5 reference section (collapsible, keeps cards in .hub-grid) ---- */
+.storm-hub .refsec{ display:contents; }
+.storm-hub .refsec.collapsed > .card{ display:none; }
+.storm-hub .reftoggle{ grid-column:1 / -1; text-align:center; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); background:var(--surface); border:1px dashed var(--border2); border-radius:11px; padding:9px; cursor:pointer; transition:.12s; margin:2px 0; }
+.storm-hub .reftoggle:hover{ color:var(--accent2); border-color:var(--accent-deep); background:var(--surface2); }
+.theme-light .storm-hub .reftoggle{ border-color:#000; background:#fff; }
+.theme-light .storm-hub .reftoggle:hover{ background:#f0f0f0; color:#000; }
+
+/* =============================================================================
+   3. GOAL PANEL + GANTT (standalone note — SPEC §5) — root class `.goalpanel`
+   ============================================================================= */
+.goalpanel{ font-size:14px; }
+.goalhead{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding-bottom:12px; margin-bottom:14px; border-bottom:1px solid var(--border); font-size:13px; }
+.goalhead .goal-hb.hb{ font-size:11px; padding:3px 10px; }
+.goalhead .goal-prog{ font-size:19px; font-weight:800; letter-spacing:-.02em; color:var(--text); font-variant-numeric:tabular-nums; }
+.goalhead .goal-meta{ color:var(--faint); font-size:12px; margin-left:auto; }
+.g-empty{ color:var(--faint); font-size:13px; padding:16px 2px; line-height:1.55; }
+.g-empty code{ background:var(--surface2); padding:1px 5px; border-radius:5px; font-size:12px; }
+.theme-light .g-empty code{ border:1px solid #000; }
+
+.gantt-wrap{ width:100%; overflow-x:auto; background:var(--surface); border:1px solid var(--border); border-radius:13px; padding:12px 10px 8px; margin-bottom:14px; }
+.gantt-wrap svg.gantt{ display:block; width:100%; min-width:640px; height:auto; }
+.gantt text{ font-family:inherit; }
+.gantt .g-axis .g-aline{ stroke:var(--border2); stroke-width:1; }
+.gantt .g-axis .g-tick{ stroke:var(--border); stroke-width:1; }
+.gantt .g-axis .g-mon{ fill:var(--faint); font-size:11px; }
+.gantt .g-label{ fill:var(--dim); font-size:12px; }
+.gantt .g-row{ cursor:pointer; }
+.gantt .g-row:hover .g-label{ fill:var(--accent2); }
+.gantt .g-row:hover .g-bar{ filter:brightness(1.18); }
+.gantt .g-row[data-health="behind"] .g-label{ fill:var(--behind); }
+.gantt .g-row[data-health="risk"] .g-label{ fill:var(--warm); }
+.gantt .g-bar{ fill:var(--accent-deep); }
+.gantt .g-bar.st-active{ fill:var(--accent); }
+.gantt .g-bar.st-backlog{ fill:var(--faint); opacity:.4; stroke:var(--faint); stroke-width:1.5; stroke-dasharray:4 3; }
+.gantt .g-bar.st-waiting{ fill:var(--warm); fill-opacity:.35; stroke:var(--warm); stroke-width:1.5; stroke-dasharray:4 3; }
+.gantt .g-bar.st-done{ fill:var(--good); }
+/* CONTRACT §C F7: at 50% over its own bar the "done" portion landed within
+   1.01–1.96:1 of the bar in every palette — and that boundary IS the progress
+   reading (WCAG 1.4.11, 3:1). Full opacity plus a --surface divider makes it a
+   crisp two-tone bar whose split is visible whatever the two fills are. */
+.gantt .g-fill{ fill:var(--accent2); opacity:1; stroke:var(--surface); stroke-width:2; pointer-events:none; }
+.gantt .g-today{ stroke:var(--warm); stroke-width:2; stroke-dasharray:4 3; }
+.theme-light .gantt .g-fill{ fill:#fff; opacity:1; stroke:#000; stroke-width:1.5; } /* carve the "done" portion out of the now-black bar; the outline keeps a 100% bar visible on white */
+.theme-light .gantt .g-bar.st-backlog{ stroke:#000; }
+.theme-light .gantt .g-bar.st-waiting{ stroke:#000; fill-opacity:.25; }
+
+.g-backlog{ display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-bottom:14px; font-size:12px; }
+.g-blabel{ color:var(--faint); font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
+.g-chip{ background:var(--surface2); border:1px solid var(--border); border-radius:9px; padding:4px 11px; font-size:12px; font-weight:600; cursor:pointer; transition:.12s; }
+.g-chip:hover{ border-color:var(--border2); color:var(--accent2); }
+.g-chip.st-done{ color:var(--faint); text-decoration:line-through; }
+.g-chip.st-waiting{ border-color:rgba(224,164,88,.4); color:var(--warm); }
+.theme-light .g-chip{ background:#fff; border-color:#000; }
+.theme-light .g-chip.st-waiting{ border-style:dashed; color:#000; }
+
+.g-tasklist{ display:flex; flex-direction:column; gap:2px; }
+.g-task{ display:flex; align-items:center; gap:10px; padding:8px 6px; border-radius:8px; font-size:12.5px; flex-wrap:wrap; }
+.g-task:hover{ background:var(--surface2); }
+.tchip{ flex:none; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:2px 7px; border-radius:6px; background:var(--surface2); color:var(--faint); }
+.tchip.st-active{ color:var(--accent2); background:color-mix(in srgb, var(--accent) 14%, transparent); }
+.tchip.st-waiting{ color:var(--warm); background:color-mix(in srgb, var(--warm) 16%, transparent); }
+.tchip.st-done{ color:var(--good); background:color-mix(in srgb, var(--good) 14%, transparent); }
+.tchip.st-backlog{ color:var(--faint); background:var(--surface2); }
+.theme-light .tchip{ background:#fff; border:1px solid #565656; }
+.theme-light .tchip.st-active{ border-color:#000; color:#000; font-weight:800; }
+.theme-light .tchip.st-waiting{ border-style:dashed; border-color:#000; color:#000; }
+.theme-light .tchip.st-done{ background:#000; color:#fff; border-color:#000; }
+.g-tname{ font-weight:650; color:var(--text); cursor:pointer; flex:1 1 140px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.g-tname:hover{ color:var(--accent2); text-decoration:underline; }
+.g-tnext{ color:var(--dim); flex:2 1 160px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.g-tnext.none{ color:var(--faint); font-style:italic; }
+.g-tdate{ color:var(--faint); font-size:11.5px; flex:none; white-space:nowrap; }
+.g-tdate.none{ font-style:italic; }
+.g-tprog{ color:var(--dim); font-size:11.5px; font-weight:650; flex:none; min-width:32px; text-align:right; font-variant-numeric:tabular-nums; }
+
+/* =============================================================================
+   4. DAILY DYNAMIC TABLES (standalone, per SPEC §6) — root class `.dt-wrap`
+   ============================================================================= */
+.dt-wrap{ font-size:13px; overflow-x:auto; }
+.dt-wrap .dt-sum{ font-size:12px; color:var(--faint); margin-bottom:9px; }
+.dt-wrap table.dt{ width:100%; min-width:420px; border-collapse:collapse; font-size:12.5px; }
+.dt-wrap table.dt th{ text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--faint); font-weight:750; padding:7px 9px; border-bottom:1px solid var(--border2); white-space:nowrap; }
+.dt-wrap table.dt td{ padding:7px 9px; border-bottom:1px solid var(--border); color:var(--dim); }
+.dt-wrap table.dt tr:last-child td{ border-bottom:none; }
+.dt-wrap table.dt tbody tr:nth-child(even) td{ background:var(--surface2); }
+.dt-wrap table.dt tbody tr:hover td{ background:var(--track); color:var(--text); }
+.dt-wrap table.dt td:first-child{ color:var(--text); }
+.dt-wrap table.dt a.internal-link{ color:var(--accent2); text-decoration:none; }
+.dt-wrap table.dt a.internal-link:hover{ text-decoration:underline; }
+.dt-wrap table.dt tr.flag td{ color:var(--text); }
+.dt-wrap table.dt tr.flag td:first-child{ border-left:3px solid var(--good); padding-left:6px; font-weight:650; }
+.theme-light .dt-wrap table.dt th{ border-bottom-color:#000; }
+.theme-light .dt-wrap table.dt a.internal-link{ color:#000; font-weight:600; }
+.theme-light .dt-wrap table.dt tr.flag td:first-child{ border-left-color:#0a7a52; }
+
+/* =============================================================================
+   5. TRIAGE (standalone, per SPEC §7) — root class `.triage`
+   ============================================================================= */
+.triage{ font-size:13px; }
+.triage .tr-tools{ display:flex; gap:9px; align-items:center; margin:2px 0 10px; flex-wrap:wrap; }
+/* `.tr-filter` combos with `.addinput` in the real markup, but `.addinput` is only
+   styled under `.storm-hub` — give it a self-sufficient look too so Triage still
+   reads correctly if it is ever rendered without a .storm-hub ancestor. */
+.triage .tr-filter{ flex:1; min-width:140px; font:inherit; font-size:12.5px; color:var(--text); background:var(--track); border:1px solid var(--border); border-radius:9px; padding:8px 11px; outline:none; transition:.12s; }
+.triage .tr-filter::placeholder{ color:var(--faint); }
+.triage .tr-filter:focus{ border-color:var(--accent-deep); box-shadow:0 0 0 1px rgba(var(--accent-rgb),.25); background:var(--surface2); }
+.theme-light .triage .tr-filter{ background:#fff; border-color:#000; }
+.theme-light .triage .tr-filter:focus{ box-shadow:none; background:#f3f3f3; }
+.tr-btn{ font:inherit; font-size:12px; font-weight:650; color:var(--text); background:var(--surface2); border:1px solid var(--border); padding:6px 12px; border-radius:10px; white-space:nowrap; cursor:pointer; transition:.12s; appearance:none; -webkit-appearance:none; flex:none; }
+.tr-btn:hover{ border-color:var(--border2); color:var(--accent2); }
+.tr-btn.armed{ color:#fff; background:var(--behind); border-color:transparent; font-weight:700; }
+.tr-btn.armed:hover{ filter:brightness(1.1); }
+.triage .tr-hint{ font-size:12px; color:var(--faint); margin-bottom:12px; line-height:1.5; }
+.triage .tr-list{ display:flex; flex-direction:column; gap:2px; }
+.triage .tr-row{ display:flex; align-items:center; gap:12px; padding:10px 8px; border-radius:9px; flex-wrap:wrap; transition:opacity .1s,background .1s; border-bottom:1px solid var(--border); }
+.triage .tr-row:last-child{ border-bottom:none; }
+.triage .tr-row:hover{ background:var(--surface2); }
+.triage .tr-row.busy{ opacity:.5; pointer-events:none; }
+.triage .tr-body{ flex:1 1 240px; min-width:0; }
+.triage .tr-line{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.triage .tr-text{ font-size:13.5px; color:var(--text); }
+.triage .tr-src{ display:flex; align-items:center; gap:8px; margin-top:3px; font-size:11.5px; flex-wrap:wrap; }
+.triage .tr-src a{ color:var(--accent2); }
+.triage .tr-src a:hover{ text-decoration:underline; }
+.triage .tr-when{ color:var(--faint); }
+.triage .tr-acts{ display:flex; align-items:center; gap:6px; flex:none; max-width:100%; flex-wrap:wrap; }
+.triage .tr-sel{ font:inherit; font-size:11.5px; font-weight:600; max-width:180px; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:6px 8px; cursor:pointer; outline:none; transition:.12s; }
+.triage .tr-sel:hover{ border-color:var(--accent-deep); }
+.triage .tr-sel:disabled{ opacity:.55; cursor:default; }
+.triage .tr-count{ font-weight:600; color:var(--accent); font-size:11px; text-transform:none; letter-spacing:0; }
+.triage .tr-empty{ color:var(--faint); font-size:12.5px; padding:8px 2px; }
+.theme-light .tr-btn{ border-color:#000; }
+.theme-light .tr-btn:hover{ background:#000; color:#fff; }
+.theme-light .tr-btn.armed{ background:#000; color:#fff; }
+.theme-light .triage .tr-sel{ background:#fff; border-color:#000; }
+.theme-light .triage .tr-count{ color:#000; }
+
+/* =============================================================================
+   6. GOALS INDEX + TASKS BOARD (standalone, per SPEC §5)
+   ============================================================================= */
+.goalsidx{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; margin:14px 0; }
+.gi-sec{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); font-weight:700; margin:22px 0 4px; }
+.gi-card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:15px 16px; transition:.12s; }
+.gi-card:hover{ border-color:var(--border2); }
+.gi-top{ display:flex; align-items:baseline; gap:8px; margin-bottom:9px; flex-wrap:wrap; }
+.gi-name{ font-size:15px; font-weight:700; cursor:pointer; }
+.gi-name:hover{ color:var(--accent2); text-decoration:underline; }
+.gi-area{ margin-left:auto; font-size:11px; color:var(--faint); }
+.gi-mid{ display:flex; align-items:center; gap:9px; margin-bottom:9px; }
+.gi-bar{ display:block; flex:1; height:7px; border-radius:5px; background:var(--track); overflow:hidden; }
+.gi-fill{ display:block; height:100%; border-radius:5px; background:linear-gradient(90deg,var(--accent-deep),var(--accent)); }
+.gi-pct{ font-size:11.5px; color:var(--dim); font-weight:650; flex:none; width:34px; text-align:right; font-variant-numeric:tabular-nums; }
+.gi-foot{ font-size:12px; color:var(--faint); }
+.gi-empty{ color:var(--faint); font-size:13px; padding:20px 4px; }
+/* CONTRACT §C F3: the "Done" group used to carry an inline `opacity:.6`, which
+   put --faint at 1.90:1. The group already has its own `Done` heading and every
+   card in it its own DONE badge, so the group is marked by a flattened ground
+   and a quieter title instead of by transparency. */
+.goalsidx.dim .gi-card{ background:var(--surface2); }
+.goalsidx.dim .gi-name{ color:var(--dim); }
+.theme-light .goalsidx.dim .gi-card{ background:#f3f3f3; }
+.theme-light .gi-fill{ background:#000; }
+
+.tasksboard{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:14px 0; align-items:start; }
+.tb-col{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:12px; display:flex; flex-direction:column; gap:8px; min-width:0; }
+.tb-head{ display:flex; align-items:center; gap:8px; font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--faint); font-weight:750; padding-bottom:9px; border-bottom:1px solid var(--border); }
+.tb-n{ margin-left:auto; background:var(--surface2); color:var(--dim); border-radius:7px; padding:1px 8px; font-weight:700; font-variant-numeric:tabular-nums; }
+.tb-card{ background:var(--track); border:1px solid var(--border); border-radius:11px; padding:10px 11px; font-size:12.5px; transition:.12s; }
+.tb-card:hover{ border-color:var(--border2); }
+.tb-row1{ margin-bottom:5px; }
+.tb-name{ font-weight:650; color:var(--text); cursor:pointer; }
+.tb-name:hover{ color:var(--accent2); text-decoration:underline; }
+.tb-row2{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px; font-size:11px; color:var(--faint); }
+.tb-goal{ cursor:pointer; color:var(--accent2); }
+.tb-goal:hover{ text-decoration:underline; }
+.tb-goal.none{ color:var(--faint); font-style:italic; cursor:default; }
+.tb-dates{ margin-left:auto; white-space:nowrap; }
+.tb-dates.none{ font-style:italic; }
+.tb-row3{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.tb-prog{ font-size:11px; color:var(--dim); font-weight:650; font-variant-numeric:tabular-nums; }
+.tb-next{ font-size:11.5px; color:var(--dim); line-height:1.35; padding-top:6px; border-top:1px dashed var(--border); }
+.tb-next.none{ color:var(--faint); }
+.tb-due{ color:var(--faint); font-size:10.5px; white-space:nowrap; }
+.tb-empty{ color:var(--faint); font-size:12px; padding:8px 2px; font-style:italic; }
+.theme-light .tb-card{ background:#fff; }
+.theme-light .tb-goal{ color:#000; font-weight:600; }
+.theme-light .tb-next{ border-top-color:#000; }
+
+@media (max-width:1100px){ .tasksboard{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:800px){ .tasksboard{ grid-template-columns:1fr; } }
+
+/* ── task Gantt (sub-task timeline) ── */
+/* ===== 📆 Task Gantt — sub-task timeline (GANTT.md §0) ===== */
+/* Agent P. Appended verbatim to the end of storm.css in every vault this
+   repo builds. Every selector is scoped to
+   the new root class `.tgantt` (plus the standalone `.tg-err` fallback), so
+   nothing here redefines anything already in storm.css / storm-additions*.css.
+   Fully variable-driven: --bg --surface --surface2 --text --dim --faint
+   --accent --accent2 --accent-deep --border --border2 --good --warm, exactly
+   the set GANTT.md §0 allows. Brand mode, which only repaints those
+   variables, therefore renders correctly with no changes here.
+
+   Sections:
+     0. Local palette on .tgantt (the .mprep / .serpanel pattern) so the panel
+        renders in a PLAIN task note that declares no cssclasses.
+     1. Header (health badge + meta line).
+     2. The SVG chart: window band, axis, ticks, rows, boxes, labels, bars,
+        milestones, due labels, done marks, today line, group separators.
+     3. Backlog chips, add row, empty state, error div.
+     4. Light theme (body.theme-light) and narrow screens.
+   ========================================================================= */
+
+/* ---------------------------------------------------------------------------
+   0. LOCAL PALETTE — same values as the shared palette blocks in
+   storm-additions.css / storm-additions-work.css, declared again here (a
+   fresh rule, not an edit of those) because a task note is a plain note.
+   --------------------------------------------------------------------------- */
+.tgantt{
+  --bg:var(--storm-bg,#0a0d11); --surface:var(--storm-surface,#141b23); --surface2:var(--storm-surface2,#1a222c);
+  --border:var(--storm-border,rgba(126,158,186,.14)); --border2:var(--storm-border2,rgba(126,158,186,.26));
+  --text:var(--storm-text,#e8eff6); --dim:var(--storm-dim,#9db0c1); --faint:var(--storm-faint,#8899a9);
+  --accent:var(--storm-accent,#5ec8e8); --accent2:var(--storm-accent2,#a7e9fb); --accent-deep:var(--storm-accent-deep,#2b8fb5);
+  --good:var(--storm-good,#63d3b0); --warm:var(--storm-warm,#e0a458);
+  color:var(--text); font-size:13px; line-height:1.5;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:12px 14px; margin:10px 0;
+}
+.tgantt *{ box-sizing:border-box; }
+
+/* =============================================================================
+   1. HEADER
+   ============================================================================= */
+.tgantt .tg-head{
+  display:flex; align-items:center; flex-wrap:wrap; gap:8px;
+  margin:0 0 8px; font-size:12.5px; color:var(--dim);
+}
+.tgantt .tg-head .tg-hb{
+  display:inline-flex; align-items:center; font-size:10.5px; font-weight:750;
+  text-transform:uppercase; letter-spacing:.04em; padding:2px 9px;
+  border-radius:7px; white-space:nowrap; line-height:1.6;
+  color:var(--faint); background:var(--surface2);
+}
+.tgantt .tg-head .tg-hb.ok{ color:var(--good); background:color-mix(in srgb, var(--good) 16%, transparent); }
+.tgantt .tg-head .tg-hb.risk{ color:var(--warm); background:color-mix(in srgb, var(--warm) 18%, transparent); }
+.tgantt .tg-head .tg-hb.behind{
+  color:color-mix(in srgb, var(--warm) 55%, #e0736b);
+  background:color-mix(in srgb, #e0736b 18%, transparent);
+}
+.tgantt .tg-head .tg-hb.done{ color:var(--good); background:color-mix(in srgb, var(--good) 9%, transparent); }
+.tgantt .tg-head .tg-hb.unscheduled{ color:var(--faint); background:var(--surface2); }
+.tgantt .tg-meta{ color:var(--dim); }
+
+/* =============================================================================
+   2. THE CHART
+   ============================================================================= */
+.tgantt .tg-svg{ display:block; width:100%; height:auto; overflow:visible; margin:2px 0 4px; }
+
+/* task start→end band behind everything */
+.tgantt .tg-window{ fill:var(--accent); fill-opacity:.05; stroke:var(--border); stroke-width:1; }
+
+/* axis + ticks */
+.tgantt .tg-axis .tg-aline{ stroke:var(--border2); stroke-width:1; }
+.tgantt .tg-axis .tg-tick{ stroke:var(--border); stroke-width:1; }
+.tgantt .tg-axis .tg-tick.month{ stroke:var(--border2); stroke-dasharray:3 3; }
+.tgantt .tg-axis .tg-tlabel{ fill:var(--faint); font-weight:600; }
+.tgantt .tg-axis .tg-tlabel.month{ fill:var(--dim); }
+
+/* rows */
+.tgantt .tg-row{ cursor:default; }
+.tgantt .tg-row:hover .tg-bar{ filter:brightness(1.18); }
+.tgantt .tg-row:hover .tg-label{ fill:var(--accent2); }
+.tgantt .tg-row:hover .tg-milestone{ filter:brightness(1.18); }
+
+/* group separator rows */
+.tgantt .tg-group .tg-glabel{ fill:var(--dim); font-weight:750; letter-spacing:.03em; }
+.tgantt .tg-group .tg-gline{ stroke:var(--border); stroke-width:1; stroke-dasharray:2 4; }
+
+/* the clickable checkbox */
+.tgantt .tg-box{ cursor:pointer; }
+/* CONTRACT §C F4: --border2 composites to 1.56:1 against the panel, and the
+   fill is --surface2, so the box had no visible boundary at all. This is an
+   interactive control (WCAG 1.4.11, 3:1) — give it its own stroke rather than
+   thickening every divider in the product by raising --border2. */
+.tgantt .tg-box rect{ fill:var(--surface2); stroke:var(--faint); stroke-width:1.2; }
+.tgantt .tg-box:hover rect{ stroke:var(--accent); }
+.tgantt .tg-box.done rect{ fill:color-mix(in srgb, var(--good) 22%, transparent); stroke:var(--good); }
+.tgantt .tg-box .tg-check{ fill:none; stroke:var(--good); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+/* label column */
+.tgantt .tg-label{ fill:var(--text); }
+.tgantt .tg-row[data-state="done"] .tg-label{ fill:var(--faint); text-decoration:line-through; }
+.tgantt .tg-row[data-state="over"] .tg-label{ fill:var(--warm); }
+
+/* bars */
+.tgantt .tg-bar{ fill:var(--accent-deep); }
+.tgantt .tg-bar.st-open{ fill:var(--accent-deep); }
+.tgantt .tg-bar.st-today{ fill:var(--accent); }
+.tgantt .tg-bar.st-over{ fill:var(--warm); fill-opacity:.55; stroke:var(--warm); stroke-width:1.5; stroke-dasharray:4 3; }
+.tgantt .tg-bar.st-done{ fill:var(--good); fill-opacity:.75; }
+
+/* projected slots — an undated sub-task paced across the task window */
+.tgantt .tg-bar.st-plan{
+  fill:var(--accent); fill-opacity:.18;
+  stroke:var(--accent); stroke-width:1.2; stroke-dasharray:5 4;
+}
+.tgantt .tg-bar.st-plan.late{
+  fill:var(--warm); fill-opacity:.14;
+  stroke:var(--warm); stroke-width:1.5; stroke-dasharray:2 3;
+}
+.tgantt .tg-bar.st-done[data-projected]{
+  fill-opacity:.5; stroke:var(--good); stroke-width:1.2; stroke-dasharray:5 4;
+}
+.tgantt rect.tg-bar[data-projected]{ cursor:pointer; }
+.tgantt rect.tg-bar[data-projected]:hover{ fill-opacity:.4; stroke-dasharray:none; }
+.tgantt .tg-due.proj{ fill:var(--faint); font-style:italic; font-weight:500; }
+
+/* milestones (state lives on data-state, never on an .st-* class) */
+.tgantt .tg-milestone{ fill:var(--accent2); stroke:var(--accent-deep); stroke-width:1; }
+.tgantt .tg-milestone[data-state="over"]{ fill:var(--warm); stroke:var(--warm); }
+.tgantt .tg-milestone[data-state="today"]{ fill:var(--accent); stroke:var(--accent); }
+.tgantt .tg-milestone[data-state="done"]{ fill:var(--good); stroke:var(--good); }
+
+/* the date printed next to (or inside) each bar */
+.tgantt .tg-due{ fill:var(--faint); font-weight:600; }
+.tgantt .tg-due.inside{ fill:var(--bg); }
+.tgantt .tg-row[data-state="over"] .tg-due{ fill:var(--warm); }
+.tgantt .tg-row[data-state="over"] .tg-due.inside{ fill:var(--bg); }
+/* a projected bar is only a translucent outline, so its inside date keeps panel ink */
+.tgantt .tg-due.proj.inside{ fill:var(--dim); font-style:italic; font-weight:500; }
+
+/* ✅ completion marker on a done bar */
+.tgantt .tg-done-mark{ fill:var(--good); stroke:var(--surface); stroke-width:1.2; }
+
+/* today */
+.tgantt .tg-today{ stroke:var(--warm); stroke-width:2; stroke-dasharray:4 3; }
+
+/* =============================================================================
+   3. BACKLOG CHIPS / ADD ROW / EMPTY / ERROR
+   ============================================================================= */
+.tgantt .tg-backlog{ display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 2px; }
+.tgantt .tg-chip{
+  background:var(--surface2); border:1px solid var(--border); border-radius:9px;
+  padding:3px 10px; font-size:12px; font-weight:600; color:var(--dim);
+  cursor:pointer; transition:.12s; white-space:nowrap;
+  max-width:100%; overflow:hidden; text-overflow:ellipsis;
+}
+.tgantt .tg-chip:hover{ border-color:var(--border2); color:var(--accent2); }
+.tgantt .tg-chip.done{ text-decoration:line-through; color:var(--good); }
+
+.tgantt .tg-add{ display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.tgantt .tg-in{
+  flex:1 1 180px; min-width:140px; background:var(--surface2); color:var(--text);
+  border:1px solid var(--border); border-radius:9px; padding:5px 10px;
+  font-size:12.5px; font-family:inherit; outline:none;
+}
+.tgantt .tg-in::placeholder{ color:var(--faint); }
+.tgantt .tg-in:focus{ border-color:var(--accent); }
+.tgantt .tg-date{
+  background:var(--surface2); color:var(--text); border:1px solid var(--border);
+  border-radius:9px; padding:5px 8px; font-size:12.5px; font-family:inherit;
+  outline:none; color-scheme:dark;
+}
+.tgantt .tg-date:focus{ border-color:var(--accent); }
+.tgantt .tg-addbtn{
+  background:var(--surface2); color:var(--accent2); border:1px solid var(--border2);
+  border-radius:9px; padding:5px 12px; font-size:13px; font-weight:700;
+  font-family:inherit; line-height:1.4; cursor:pointer; transition:.12s;
+}
+.tgantt .tg-addbtn:hover{ background:var(--accent-deep); color:var(--bg); border-color:var(--accent); }
+
+.tgantt .tg-empty{
+  color:var(--faint); font-size:12.5px; font-style:italic;
+  padding:10px 0 4px; text-align:center;
+}
+
+.tg-err{
+  color:#e0736b; background:var(--surface, #141b23);
+  border:1px solid rgba(224,115,107,.4); border-radius:12px;
+  padding:12px 14px; margin:10px 0; font-size:13px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+}
+
+/* =============================================================================
+   4. LIGHT THEME + NARROW SCREENS
+   ============================================================================= */
+body.theme-light .tgantt{
+  --bg:var(--storm-bg,#ffffff); --surface:var(--storm-surface,#ffffff); --surface2:var(--storm-surface2,#f3f3f3);
+  --border:var(--storm-border,#b9b9b9); --border2:var(--storm-border2,#000000);
+  --text:var(--storm-text,#000000); --dim:var(--storm-dim,#2a2a2a); --faint:var(--storm-faint,#565656);
+  --accent:var(--storm-accent,#000000); --accent2:var(--storm-accent2,#000000); --accent-deep:var(--storm-accent-deep,#000000);
+  --good:var(--storm-good,#0a7a52); --warm:var(--storm-warm,#000000);
+  border-color:#000;
+}
+body.theme-light .tgantt .tg-head .tg-hb{ border:1px solid #000; background:#fff; color:#000; }
+body.theme-light .tgantt .tg-head .tg-hb.ok{ color:#0a7a52; border-color:#0a7a52; background:#fff; }
+body.theme-light .tgantt .tg-head .tg-hb.risk{ color:#000; border-width:2px; font-weight:800; background:#fff; }
+body.theme-light .tgantt .tg-head .tg-hb.behind{ background:#000; color:#fff; border-color:#000; font-weight:800; }
+body.theme-light .tgantt .tg-head .tg-hb.done{ color:#0a7a52; border-style:dashed; background:#fff; }
+body.theme-light .tgantt .tg-head .tg-hb.unscheduled{ color:#565656; border-color:#b9b9b9; background:#fff; }
+body.theme-light .tgantt .tg-window{ fill:#000; fill-opacity:.04; stroke:#b9b9b9; }
+body.theme-light .tgantt .tg-bar{ stroke:#000; stroke-width:1; }
+body.theme-light .tgantt .tg-bar.st-open{ fill:#fff; }
+body.theme-light .tgantt .tg-bar.st-today{ fill:#000; }
+body.theme-light .tgantt .tg-bar.st-over{ fill:#fff; fill-opacity:1; stroke:#000; stroke-dasharray:4 3; }
+body.theme-light .tgantt .tg-bar.st-done{ fill:#0a7a52; fill-opacity:1; stroke:#0a7a52; }
+body.theme-light .tgantt .tg-bar.st-plan{ fill:#fff; fill-opacity:1; stroke:#000; stroke-width:1; stroke-dasharray:5 4; }
+body.theme-light .tgantt .tg-bar.st-plan.late{ fill:#e9e9e9; fill-opacity:1; stroke:#000; stroke-width:1.5; stroke-dasharray:2 3; }
+body.theme-light .tgantt .tg-bar.st-done[data-projected]{ fill:#0a7a52; fill-opacity:.55; stroke:#0a7a52; stroke-dasharray:5 4; }
+body.theme-light .tgantt rect.tg-bar[data-projected]:hover{ fill:#d9d9d9; fill-opacity:1; stroke-dasharray:none; }
+body.theme-light .tgantt .tg-due.proj{ fill:#565656; }
+body.theme-light .tgantt .tg-bar.st-plan + .tg-due.inside{ fill:#000; }
+body.theme-light .tgantt .tg-due.inside{ fill:#fff; }
+body.theme-light .tgantt .tg-bar.st-over + .tg-due.inside,
+body.theme-light .tgantt .tg-bar.st-open + .tg-due.inside{ fill:#000; }
+body.theme-light .tgantt .tg-due.proj.inside{ fill:#000; }
+body.theme-light .tgantt .tg-milestone{ fill:#fff; stroke:#000; stroke-width:1.5; }
+body.theme-light .tgantt .tg-done-mark{ fill:#0a7a52; stroke:#fff; }
+body.theme-light .tgantt .tg-today{ stroke:#000; stroke-width:2; }
+body.theme-light .tgantt .tg-box.done rect{ fill:#0a7a52; stroke:#0a7a52; }
+body.theme-light .tgantt .tg-box .tg-check{ stroke:#fff; }
+body.theme-light .tgantt .tg-chip{ background:#fff; border-color:#000; }
+body.theme-light .tgantt .tg-date{ color-scheme:light; }
+body.theme-light .tgantt .tg-addbtn:hover{ background:#000; color:#fff; }
+
+@media (max-width: 600px){
+  .tgantt{ padding:10px; }
+  .tgantt .tg-head{ font-size:12px; }
+  .tgantt .tg-add{ gap:5px; }
+  .tgantt .tg-in{ flex:1 1 100%; }
+}
+
+/* ── paused goals and tasks ── */
+/* PAUSE §5 — a paused goal or task is parked, not broken. Everything here reads
+   as "quiet", never as an alarm: no --warm, no --behind, no accent glow. Only the
+   design tokens that already exist in storm.css are used, so this block drops
+   into any vault built from these sources unchanged.
+
+   Emitted by: goal-panel.txt · task-gantt.txt · 🎯 Goals.md · 📋 Tasks.md ·
+               buildHub.js (`hb paused` badge). */
+
+/* ---- 1. the badge ------------------------------------------------------- */
+/* Neutral and dim — a shade calmer than `.hb.unscheduled`, with a hairline so it
+   still reads as a deliberate state rather than a missing one. */
+.hb.paused{ color:var(--dim); background:var(--surface2); box-shadow:inset 0 0 0 1px var(--border2); }
+.theme-light .hb.paused{ color:#565656; border-color:#565656; border-style:dashed; background:#fff; box-shadow:none; opacity:1; }
+
+/* ---- 2. muted rows ------------------------------------------------------ */
+/* CONTRACT §C F3 — "paused" used to be `opacity:.55`, which dragged every token
+   inside the row 1.7–3.2:1 and compounded with the `.none` placeholders down to
+   1.37:1. `opacity` cannot be made safe here: --faint and --dim are floored at
+   exactly 4.5:1 in the generated palettes, so ANY value below 1 fails for some
+   banner image. The state is carried by non-colour signals instead — a dashed
+   edge, a flattened (no-elevation) ground, the grey progress rail and the
+   `Paused` badge — which WCAG 1.4.1 prefers anyway. */
+.gc-row[data-paused],
+.tb-card[data-paused]{ border-style:dashed; }
+.nm-row[data-paused]{ box-shadow:none; color:var(--dim); }
+.nm-row[data-paused] .nm-date{ color:var(--faint); }
+.nm-row[data-paused] .nm-text{ text-decoration:underline dotted var(--border2); text-underline-offset:3px; }
+.tb-card[data-paused]{ border-color:var(--border2); background:var(--surface2); }
+.gc-row[data-paused] .gc-bar > span{ background:var(--faint); }
+.g-row[data-paused] .g-label{ fill:var(--faint); }
+/* the paused bar is hollow and its completed portion solid grey, so the split
+   stays a 4.5:1 boundary instead of grey-on-grey */
+.g-row[data-paused] .g-bar{ fill:var(--surface2); fill-opacity:1; stroke:var(--faint); stroke-width:1.2; stroke-dasharray:4 3; }
+.g-row[data-paused] .g-fill{ fill:var(--faint); stroke:none; }
+.g-task[data-paused]{ background:var(--surface2); border-radius:8px; }
+.gi-card[data-paused]{ border-style:dashed; background:var(--surface2); }
+.gi-card[data-paused] .gi-fill{ background:var(--faint); }
+.theme-light .gi-card[data-paused]{ background:#f3f3f3; }
+.theme-light .tb-card[data-paused],
+.theme-light .gc-row[data-paused]{ border-style:dashed; border-color:#565656; }
+.theme-light .g-task[data-paused]{ background:#f3f3f3; }
+
+/* ---- 3. the 🎯 Goals "Paused (n)" group -------------------------------- */
+/* Collapsed by default, sits below everything else, and announces itself with a
+   quiet section rule rather than a coloured heading. */
+.goal-paused{ margin-top:24px; border-top:1px solid var(--border); padding-top:6px; }
+.goal-paused summary{ list-style:none; cursor:pointer; display:flex; align-items:center; gap:7px;
+  font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--faint); padding:8px 2px; border-radius:8px; }
+.goal-paused summary::-webkit-details-marker{ display:none; }
+.goal-paused summary::after{ content:"\25B8"; margin-left:auto; font-size:11px; letter-spacing:0; transition:transform .12s; }
+.goal-paused[open] summary::after{ transform:rotate(90deg); }
+.goal-paused summary:hover{ color:var(--dim); background:var(--surface2); }
+.goal-paused > .goalsidx{ margin-top:4px; padding-bottom:4px; }
+.theme-light .goal-paused{ border-top-color:#b9b9b9; }
+.theme-light .goal-paused summary{ color:#2a2a2a; }
+.theme-light .goal-paused summary:hover{ background:#f3f3f3; color:#000; }
+
+/* The board grew a fifth column (Backlog · Active · Waiting · Paused · Done).
+   The base sheet steps 4 → 2 → 1; five columns need an intermediate step or the
+   cards go unreadably narrow between 1100px and about 1400px. */
+.tasksboard{ grid-template-columns:repeat(5,1fr); }
+@media (max-width:1400px){ .tasksboard{ grid-template-columns:repeat(3,1fr); } }
+@media (max-width:1100px){ .tasksboard{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:800px){ .tasksboard{ grid-template-columns:1fr; } }
+
+/* A paused Timeline has no overdue and no due-today work, so its chart must not
+   keep shouting in the alarm colours either. */
+.tgantt[data-paused] .tg-bar.st-over,
+.tgantt[data-paused] .tg-bar.st-today{ fill:var(--faint); fill-opacity:.5; stroke:var(--faint); }
+.tgantt[data-paused] .tg-milestone[data-state="over"],
+.tgantt[data-paused] .tg-milestone[data-state="today"]{ fill:var(--faint); stroke:var(--faint); }
+.tgantt[data-paused] .tg-row[data-state="over"] .tg-due,
+.tgantt[data-paused] .tg-row[data-state="today"] .tg-due{ fill:var(--faint); }
+.tgantt[data-paused] .tg-row[data-state="over"] .tg-label,
+.tgantt[data-paused] .tg-row[data-state="today"] .tg-label{ fill:var(--dim); }
+
+/* ---- 4. the pause / resume controls ------------------------------------ */
+/* Sized and coloured like the other small inline affordances (.tg-addbtn,
+   .nm-act): quiet until hovered, never competing with the health badge. */
+.pausebtn, .resumebtn{ margin-left:auto; flex:none; appearance:none; cursor:pointer;
+  font:inherit; font-size:11px; font-weight:650; line-height:1.5; white-space:nowrap;
+  padding:3px 10px; border-radius:8px; border:1px solid var(--border2);
+  background:var(--surface2); color:var(--dim); transition:.12s; }
+.pausebtn:hover, .resumebtn:hover{ color:var(--text); border-color:var(--accent); }
+.pausebtn:focus-visible, .resumebtn:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+.resumebtn{ color:var(--accent); }
+/* On a 🎯 Goals row the control gets its own right-aligned line, so a long goal
+   name can never push it onto a ragged second row. */
+.gi-acts{ display:flex; justify-content:flex-end; margin-top:9px; }
+.gi-acts .resumebtn{ margin-left:0; }
+.theme-light .pausebtn, .theme-light .resumebtn{ background:#fff; color:#000; border-color:#000; }
+.theme-light .pausebtn:hover, .theme-light .resumebtn:hover{ background:#f3f3f3; border-color:#000; }
+
+/* ---- 5. the inline resume confirm bar ---------------------------------- */
+/* An in-panel two/three button row — never a modal or a confirm() dialog, both of
+   which freeze the plugin host. Empty means "not asking", so it takes no space. */
+.resumebar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+  margin-top:10px; padding:9px 11px; border-radius:10px;
+  border:1px solid var(--border2); background:var(--surface2); font-size:12.5px; }
+.resumebar:empty{ display:none; }
+.resumebar .rb-q{ color:var(--text); margin-right:2px; }
+.resumebar button{ appearance:none; cursor:pointer; font:inherit; font-size:12px; font-weight:650;
+  line-height:1.5; white-space:nowrap; padding:4px 11px; border-radius:8px;
+  border:1px solid var(--border2); background:var(--surface); color:var(--text); transition:.12s; }
+.resumebar button:hover{ border-color:var(--accent); color:var(--accent2); }
+.resumebar button:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+.resumebar button[data-resume-do]{ border-color:var(--accent-deep); }
+.resumebar button[data-resume-cancel]{ color:var(--dim); border-color:var(--border); }
+.resumebar button[data-resume-cancel]:hover{ color:var(--dim); border-color:var(--border2); }
+.theme-light .resumebar{ background:#fff; border-color:#000; }
+.theme-light .resumebar .rb-q{ color:#000; }
+.theme-light .resumebar button{ background:#fff; color:#000; border-color:#000; }
+.theme-light .resumebar button:hover{ background:#f3f3f3; color:#000; border-color:#000; }
+.theme-light .resumebar button[data-resume-cancel]{ color:#565656; border-color:#b9b9b9; }
+
+/* ---- 6. the ＋ Task control and its inline row (ADDTASK) ----------------- */
+/* A goal note already knows its own identity, so adding work under it needs a
+   name and nothing else. The control sits beside ⏸️ Pause / ▶ Resume and is sized
+   and coloured exactly like it; a paused goal keeps it. Every colour here is a
+   --storm-* token by way of the palette block in §0, so the e-ink light mode
+   repaints it with no overrides of its own. */
+.addtaskbtn{ margin-left:0; flex:none; appearance:none; cursor:pointer;
+  font:inherit; font-size:11px; font-weight:650; line-height:1.5; white-space:nowrap;
+  padding:3px 10px; border-radius:8px; border:1px solid var(--border2);
+  background:var(--surface2); color:var(--accent); transition:.12s; }
+.addtaskbtn:hover{ color:var(--text); border-color:var(--accent); }
+.addtaskbtn:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+
+/* The row itself — the Timeline's ＋ row and the resume bar in one shape. Empty
+   means "not asking", so a closed row takes no space at all. */
+.addtaskbar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+  margin-top:10px; padding:9px 11px; border-radius:10px;
+  border:1px solid var(--border2); background:var(--surface2); font-size:12.5px; }
+.addtaskbar:empty{ display:none; }
+.addtaskbar input{ appearance:none; font:inherit; font-size:12.5px; line-height:1.5;
+  padding:5px 9px; border-radius:8px; border:1px solid var(--border2);
+  background:var(--surface); color:var(--text); }
+.addtaskbar input::placeholder{ color:var(--faint); opacity:1; }
+.addtaskbar input:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent); }
+.addtaskbar input[type="text"]{ flex:1 1 210px; min-width:140px; }
+/* the native date control paints its own calendar glyph: tell it which way round
+   the surface is, or the glyph is dark ink on the dark --surface */
+.addtaskbar input[type="date"]{ flex:0 0 auto; color-scheme:dark; }
+.theme-light .addtaskbar input[type="date"]{ color-scheme:light; }
+.addtaskbar button{ appearance:none; cursor:pointer; font:inherit; font-size:12px; font-weight:650;
+  line-height:1.5; white-space:nowrap; padding:4px 11px; border-radius:8px;
+  border:1px solid var(--border2); background:var(--surface); color:var(--text); transition:.12s; }
+.addtaskbar button:hover{ border-color:var(--accent); color:var(--accent2); }
+.addtaskbar button:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+/* Add is the primary: it is what keeps you on the goal, adding one task after
+   another. Add & open is the way out, Cancel the quietest thing in the row. */
+.addtaskbar button[data-at="add"]{ border-color:var(--accent-deep); color:var(--accent2); }
+.addtaskbar button[data-at="cancel"]{ color:var(--dim); border-color:var(--border); }
+.addtaskbar button[data-at="cancel"]:hover{ color:var(--dim); border-color:var(--border2); }
+/* A 🎯 Goals card is a third the width of a goal note, so the same six controls
+   wrap raggedly there. Inside a card the row becomes a small two-column grid —
+   name across the top, the two dates side by side, then the buttons — which is
+   the same reading order, just packed. `:not(:empty)` so a closed row stays gone. */
+.gi-card .addtaskbar:not(:empty){ display:grid; grid-template-columns:1fr 1fr; }
+.gi-card .addtaskbar input{ min-width:0; }
+.gi-card .addtaskbar input[type="text"]{ grid-column:1 / -1; }
+.gi-card .addtaskbar button[data-at="cancel"]{ grid-column:1 / -1; }
+
+/* ===== THEME2 §C — the guarded panel call site =====================================
+   A goal / task note no longer calls dv.view() blind: it resolves _scripts/<panel>.js
+   the way Dataview does and, when the file has not reached this device, renders the
+   panel's own error element with a message that says so. Two rules carry it.
+
+   .panel-err is the framing every panel's error div already asks for; it is here
+   so the same message looks the same wherever a panel fails to load.
+   .storm-missing-view deliberately sets NO colour of its own: the text takes
+   --text-normal, which storm-theme.css floors against the page it lands on and which
+   every installed theme defines — so the one message whose whole job is to be read on
+   a half-synced vault stays legible even if this snippet is the thing that is missing.
+   ================================================================================ */
+.panel-err{ background:rgba(224,115,107,.08); border:1px solid rgba(224,115,107,.32); border-radius:11px; margin:8px 0 !important; }
+.theme-light .panel-err{ background:#fff; border:2px solid #000; }
+.storm-missing-view{ padding:12px 14px; font-size:13.5px; line-height:1.55; color:var(--text-normal);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif; }

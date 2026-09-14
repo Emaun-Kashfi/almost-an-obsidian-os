@@ -325,7 +325,7 @@ body.theme-light .workspace-ribbon { background: #f4f4f4 !important; }
    greeting lands on plain white and the dark-mode near-whites above were
    invisible — 1.07:1 for the clock, 1.34 for the greeting, 1.55 for the date.
    Repaint them for a white ground. A banner that KEEPS a painted ground in
-   light mode (rx3's `.brand-grad`) opts out here and gets light ink of its own
+   light mode opts out with `.brand-grad` and gets light ink of its own
    next to the gradient that creates the problem. */
 .theme-light .storm-hub .banner:not(.brand-grad) .greet .g{ color:#2a2a2a; }      /* 14.35:1 */
 .theme-light .storm-hub .banner:not(.brand-grad) .greet .clock{ color:#000000; }  /* 21.0:1  */
@@ -1380,10 +1380,10 @@ mark.shl-q{    background:rgba(240,111,111,.32); }
 @media (max-width:1100px){ .tasksboard{ grid-template-columns:repeat(2,1fr); } }
 @media (max-width:800px){ .tasksboard{ grid-template-columns:1fr; } }
 
-/* ── task Gantt (sub-task timeline) — from rx4/build/task-gantt.css ── */
+/* ── task Gantt (sub-task timeline) ── */
 /* ===== 📆 Task Gantt — sub-task timeline (GANTT.md §0) ===== */
-/* Agent P. Appended verbatim to the end of storm.css in all three vaults
-   (Storm personal, Storm template, work vault). Every selector is scoped to
+/* Agent P. Appended verbatim to the end of storm.css in every vault this
+   repo builds. Every selector is scoped to
    the new root class `.tgantt` (plus the standalone `.tg-err` fallback), so
    nothing here redefines anything already in storm.css / storm-additions*.css.
    Fully variable-driven: --bg --surface --surface2 --text --dim --faint
@@ -1621,11 +1621,11 @@ body.theme-light .tgantt .tg-addbtn:hover{ background:#000; color:#fff; }
   .tgantt .tg-in{ flex:1 1 100%; }
 }
 
-/* ── paused goals and tasks — from rx5/pause.css ── */
+/* ── paused goals and tasks ── */
 /* PAUSE §5 — a paused goal or task is parked, not broken. Everything here reads
    as "quiet", never as an alarm: no --warm, no --behind, no accent glow. Only the
-   design tokens that already exist in both vaults' storm.css are used, so this
-   block drops into the work vault unchanged.
+   design tokens that already exist in storm.css are used, so this block drops
+   into any vault built from these sources unchanged.
 
    Emitted by: goal-panel.txt · task-gantt.txt · 🎯 Goals.md · 📋 Tasks.md ·
                buildHub.js (`hb paused` badge). */
@@ -1791,9 +1791,8 @@ body.theme-light .tgantt .tg-addbtn:hover{ background:#000; color:#fff; }
    the way Dataview does and, when the file has not reached this device, renders the
    panel's own error element with a message that says so. Two rules carry it.
 
-   .panel-err is the framing every panel's error div already asks for (the work vault
-   has carried it since BUILD §1.6); it is here so the same message looks the same in
-   both vaults.
+   .panel-err is the framing every panel's error div already asks for; it is here
+   so the same message looks the same wherever a panel fails to load.
    .storm-missing-view deliberately sets NO colour of its own: the text takes
    --text-normal, which storm-theme.css floors against the page it lands on and which
    every installed theme defines — so the one message whose whole job is to be read on
